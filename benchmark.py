@@ -321,6 +321,9 @@ def benchmark_case(case):
     env = os.environ.copy()
     env["BENCH_APP"] = case["kind"]
     env["PYTHONUNBUFFERED"] = "1"
+    env["PATH"] = f"{py.parent}:{env.get('PATH', '')}"
+    if case["slug"] == "turboapi":
+        env["TURBO_DISABLE_CACHE"] = "1"
     cmd = server_command(case, py)
 
     with log_path.open("w", encoding="utf-8") as log:
