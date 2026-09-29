@@ -1,91 +1,134 @@
 # Conclusion for a StarRocks-facing Python API gateway
 
-Benchmark date: 2026-09-29 (GitHub-hosted Ubuntu runners)
+Benchmark date: 2026-09-30
 
-This repository contains two complementary benchmarks:
+The repository now contains three layers of measurement:
 
-- `RESULTS.md`: inbound HTTP server/framework ceiling test.
-- `CLIENT_RESULTS.md`: pooled outbound HTTP/1.1 client test, representative of an API process calling StarRocks HTTP SQL.
+- `RESULTS.md`: constant-JSON inbound HTTP ceiling.
+- `CLIENT_RESULTS.md`: pooled outbound HTTP client benchmark.
+- `STARROCKS_BENCHMARK.md`: realistic gateway path using pyreqwest, StarRocks-style NDJSON, parsing and response serialization.
 
-## 1. Inbound server/framework result
+The third benchmark is the most relevant one for framework selection.
 
-Latest same-run ranking (4 logical CPUs, AMD EPYC 9V74):
+## Realistic gateway result
 
-| Stack | Median RPS | Relative to BustAPI |
-|---|---:|---:|
-| TurboAPI 1.0.35 / Python 3.14t | 115,813 | 4.42x |
-| FastPySGI WSGI (raw server ceiling) | 100,587 | 3.84x |
-| Dreaming Electric Sheep 1.2.1 | 82,473 | 3.15x |
-| Granian raw RSGI 2.8.3 | 55,842 | 2.13x |
-| Jero + Granian | 39,886 | 1.52x |
-| Sanic | 32,229 | 1.23x |
-| BustAPI 0.15.0 | 26,179 | 1.00x |
-
-The remaining tested frameworks are in `RESULTS.md`.
-
-### TurboAPI warning
-
-TurboAPI is the fastest tested framework in the latest run, but it is **not yet the safest production choice** based on these measurements.
-
-An earlier run on an AMD EPYC 7763 GitHub runner installed TurboAPI 1.0.35 successfully, started the Zig server, registered the route, and then exited with signal `-4` (SIGILL) before a valid benchmark could be collected. A later run on AMD EPYC 9V74 succeeded and reached ~115.8k RPS.
-
-That does not prove the exact root cause is the CPU model, but it demonstrates environment-sensitive native-runtime behavior that should be resolved or reproduced before using TurboAPI for a customer-facing production endpoint.
-
-Also note that TurboAPI uses Python 3.14t and a different native/free-threaded runtime, so its number is not a strict CPython-3.13 apples-to-apples comparison.
-
-## 2. Outbound HTTP client result
-
-For the actual StarRocks gateway, this layer matters because each cache miss / singleflight leader will issue an HTTP request to StarRocks.
-
-Same-run HTTP/1.1 keep-alive result:
-
-| Client | Median RPS | Relative to aiohttp |
-|---|---:|---:|
-| pyreqwest 0.13.0 | 17,620 | 1.15x |
-| aiohttp 3.14.3 | 15,354 | 1.00x |
-| pyqwest 0.11.0 | 13,552 | 0.88x |
-| httpx 0.28.1 | 362 | 0.02x |
-
-All four completed with zero request errors in the measured rounds.
-
-For this workload, **pyreqwest is the first client to test against the real StarRocks HTTP SQL endpoint**, with **aiohttp as the mature fallback/reference**. HTTPX is not attractive for a throughput-sensitive proxy path based on this test.
-
-## 3. Practical decision for the current project
-
-The API service is a thin gateway:
+Measured path:
 
 ```
-client
-  -> authentication / tenant checks
-  -> validation / rate limit
-  -> local short TTL cache + singleflight
-  -> pooled HTTP client
-  -> StarRocks HTTP SQL API
+wrk
+ -> Python HTTP stack
+ -> pyreqwest keep-alive
+ -> StarRocks-style NDJSON response
+ -> NDJSON parsing
+ -> API JSON serialization
+ -> client
 ```
 
-The framework hot path is therefore only part of total latency. Once a StarRocks query takes milliseconds or tens of milliseconds, the relative difference between 25k and 80k "hello JSON" RPS shrinks substantially.
+SQL shape: `select id, date from test;`.
 
-Recommended evaluation order:
+Runner: AMD EPYC 7763, 4 logical CPUs, 128 concurrent connections.
 
-1. **Keep BustAPI as the production baseline** until a realistic StarRocks proxy benchmark proves migration is worthwhile.
-2. Replace/benchmark the outbound client first: **pyreqwest vs aiohttp** with one long-lived connection pool per API process.
-3. If inbound HTTP overhead becomes measurable, benchmark **Granian raw RSGI** for the intentionally thin gateway. It gives a large ceiling increase without requiring Python 3.14t.
-4. Evaluate **Dreaming Electric Sheep** if its API/maturity satisfies production requirements; it was the fastest normal CPython-3.13 framework in this run.
-5. Treat **TurboAPI** as the performance leader / experimental candidate until the observed SIGILL variability is explained and production compatibility is verified on the actual 16-core cloud host CPU.
+### Overall, equal weighting across four scenarios
 
-## 4. What these numbers do and do not prove
+| Rank | Stack | Geometric-mean RPS |
+|---:|---|---:|
+| 1 | Sanic | 1,385 |
+| 2 | Uvicorn raw ASGI | 1,346 |
+| 3 | Jero + Granian | 1,323 |
+| 4 | Granian raw RSGI | 1,248 |
+| 5 | Litestar + Granian | 1,218 |
+| 6 | aiohttp | 1,216 |
+| 7 | BlackSheep + Granian | 1,185 |
+| 8 | Emmett + Granian | 1,181 |
+| 9 | Starlette + Granian | 1,167 |
+| 10 | Falcon + Granian | 1,137 |
+| 11 | Robyn | 1,113 |
+| 12 | BustAPI | 995 |
+| 13 | FastAPI + Granian | 526 |
+| 14 | Dreaming Electric Sheep | 177 |
+| 15 | FastPySGI | 171 |
 
-These are controlled microbenchmarks on GitHub-hosted runners. They are useful for comparing framework and client overhead, but they are not capacity numbers for the production 16C/64G server.
+TurboAPI did not complete any realistic scenario on this EPYC 7763 runner because the process exited with SIGILL (-4).
 
-GitHub changes runner CPU models between runs; therefore:
+## Scenario winners
 
-- compare frameworks **within the same run**, not absolute RPS across different runs;
-- use the production machine for the final capacity benchmark;
-- the decisive test should include authentication, query-key construction, singleflight, the chosen HTTP client, NDJSON parsing, and a real StarRocks query.
+| Scenario | Winner | Median RPS | BustAPI | Winner advantage |
+|---|---|---:|---:|---:|
+| 0ms / 100 rows | Sanic | 2,248 | 1,503 | ~50% |
+| 5ms / 100 rows | Sanic | 2,422 | 1,499 | ~62% |
+| 20ms / 100 rows | Jero + Granian | 2,017 | 1,457 | ~38% |
+| 5ms / 1000 rows | Jero + Granian | 367 | 299 | ~23% |
 
-The raw machine-readable data is in:
+This changes the conclusion from the constant-JSON benchmark.
+
+## Important findings
+
+### 1. Empty-route RPS is not enough
+
+Dreaming Electric Sheep and FastPySGI looked extremely fast in the constant-response benchmark. Once upstream I/O was introduced, their synchronous path collapsed:
+
+- at 20ms / 100 rows, both were about 28 RPS;
+- asynchronous stacks remained around 1,450-2,020 RPS.
+
+For a StarRocks gateway, asynchronous I/O behavior is therefore more important than a spectacular hello-world RPS number.
+
+### 2. BustAPI works, but it was not the fastest realistic gateway
+
+BustAPI completed every scenario with zero non-2xx responses, but ranked 12th by equal-weight geometric mean.
+
+Compared with BustAPI:
+
+- Sanic was roughly 39% higher on the four-scenario geometric-mean score;
+- Jero + Granian was roughly 33% higher;
+- Granian raw RSGI was roughly 25% higher.
+
+### 3. Workload shape changes the winner
+
+Sanic won the small/fast result scenarios.
+
+Jero + Granian won both:
+
+- 20ms query latency / 100 rows;
+- 5ms / 1000-row result.
+
+For a dashboard workload with small result sets and very fast StarRocks queries, Sanic is currently the strongest measured candidate.
+
+For more typical SQL latency or larger result sets, Jero + Granian is currently the strongest measured candidate.
+
+### 4. TurboAPI remains experimental for this deployment decision
+
+TurboAPI previously reached ~115.8k constant-JSON RPS on an EPYC 9V74 runner.
+
+However, it has now failed with SIGILL on EPYC 7763 in both an earlier test and every realistic StarRocks scenario in this run.
+
+Until that CPU/runtime compatibility issue is understood and reproduced on the actual cloud host CPU, it should not be selected for the customer-facing production API solely because of its microbenchmark speed.
+
+## Outbound HTTP client
+
+The separate pooled-client benchmark still favors pyreqwest:
+
+| Client | Median RPS |
+|---|---:|
+| pyreqwest | 17,620 |
+| aiohttp | 15,354 |
+| pyqwest | 13,552 |
+| httpx | 362 |
+
+For the gateway hot path, pyreqwest remains the first client to validate against the real StarRocks cluster.
+
+## Current engineering recommendation
+
+The most useful production candidates to carry into the final on-host test are:
+
+1. Sanic + pyreqwest
+2. Jero + Granian + pyreqwest
+3. Granian raw RSGI + pyreqwest
+4. BustAPI + pyreqwest as the existing baseline
+
+The final decision should not use GitHub-runner absolute RPS. Run these four stacks on the actual 16C/64G API host against the actual StarRocks 4.1.1 FE/LB, with the real authentication path, SQL templates, NDJSON parsing, singleflight and intended response sizes.
+
+Raw results:
 
 - `results/latest.json`
 - `results/client_latest.json`
-
-The GitHub Actions workflow can reproduce both suites.
+- `results/starrocks_latest.json`
