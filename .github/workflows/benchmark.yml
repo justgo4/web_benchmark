@@ -7,6 +7,7 @@ on:
     paths-ignore:
       - RESULTS.md
       - CLIENT_RESULTS.md
+      - STARROCKS_BENCHMARK.md
       - results/**
 
 permissions:
@@ -44,11 +45,20 @@ jobs:
       - name: Run outbound HTTP client benchmark
         run: python proxy_benchmark.py
 
+      - name: Run realistic StarRocks gateway benchmark
+        env:
+          REAL_BENCH_ROUNDS: "2"
+          REAL_BENCH_DURATION: "4"
+          REAL_BENCH_CONNECTIONS: "128"
+          REAL_BENCH_THREADS: "2"
+        run: python real_benchmark.py
+
       - name: Show result
         if: always()
         run: |
           test -f RESULTS.md && cat RESULTS.md || true
           test -f CLIENT_RESULTS.md && cat CLIENT_RESULTS.md || true
+          test -f STARROCKS_BENCHMARK.md && cat STARROCKS_BENCHMARK.md || true
           test -f results/latest.json && cat results/latest.json || true
           test -f results/client_latest.json && cat results/client_latest.json || true
 
@@ -60,6 +70,7 @@ jobs:
           path: |
             RESULTS.md
             CLIENT_RESULTS.md
+            STARROCKS_BENCHMARK.md
             results/
           if-no-files-found: warn
 
@@ -68,7 +79,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add RESULTS.md CLIENT_RESULTS.md results/latest.json results/client_latest.json
+          git add RESULTS.md CLIENT_RESULTS.md STARROCKS_BENCHMARK.md results/latest.json results/client_latest.json results/starrocks_latest.json
           git diff --cached --quiet && exit 0
           git commit -m "Record HTTP benchmark results [skip ci]"
           git push
