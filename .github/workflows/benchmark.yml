@@ -1,0 +1,64 @@
+name: Python HTTP benchmark
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - RESULTS.md
+      - results/**
+
+permissions:
+  contents: write
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      BENCH_ROUNDS: "3"
+      BENCH_DURATION: "6"
+      BENCH_CONNECTIONS: "128"
+      BENCH_THREADS: "2"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install benchmark tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wrk
+          python -m pip install --upgrade uv
+
+      - name: Run benchmark
+        run: python benchmark.py
+
+      - name: Show result
+        if: always()
+        run: |
+          test -f RESULTS.md && cat RESULTS.md || true
+          test -f results/latest.json && cat results/latest.json || true
+
+      - name: Upload raw logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-http-benchmark-${{ github.run_id }}
+          path: |
+            RESULTS.md
+            results/
+          if-no-files-found: warn
+
+      - name: Commit measured result
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add RESULTS.md results/latest.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Record HTTP benchmark results [skip ci]"
+          git push
