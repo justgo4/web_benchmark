@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths-ignore:
       - RESULTS.md
+      - CLIENT_RESULTS.md
       - results/**
 
 permissions:
@@ -37,11 +38,19 @@ jobs:
       - name: Run benchmark
         run: python benchmark.py
 
+      - name: Install outbound client benchmark libraries
+        run: python -m pip install --upgrade aiohttp httpx pyreqwest pyqwest fastpysgi uvloop
+
+      - name: Run outbound HTTP client benchmark
+        run: python proxy_benchmark.py
+
       - name: Show result
         if: always()
         run: |
           test -f RESULTS.md && cat RESULTS.md || true
+          test -f CLIENT_RESULTS.md && cat CLIENT_RESULTS.md || true
           test -f results/latest.json && cat results/latest.json || true
+          test -f results/client_latest.json && cat results/client_latest.json || true
 
       - name: Upload raw logs
         if: always()
@@ -50,6 +59,7 @@ jobs:
           name: python-http-benchmark-${{ github.run_id }}
           path: |
             RESULTS.md
+            CLIENT_RESULTS.md
             results/
           if-no-files-found: warn
 
@@ -58,7 +68,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add RESULTS.md results/latest.json
+          git add RESULTS.md CLIENT_RESULTS.md results/latest.json results/client_latest.json
           git diff --cached --quiet && exit 0
           git commit -m "Record HTTP benchmark results [skip ci]"
           git push
