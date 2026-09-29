@@ -1,0 +1,1916 @@
+{
+  "meta": {
+    "generated_utc": "2026-09-29T23:52:07.919534+00:00",
+    "cpu_model": "AMD EPYC 7763 64-Core Processor",
+    "logical_cpus": 4,
+    "connections": 128,
+    "threads": 2,
+    "rounds": 2,
+    "duration_seconds": 4,
+    "query": "select id, date from test;",
+    "outbound_client": "pyreqwest",
+    "mock": "FastPySGI NDJSON upstream on loopback; query delay simulated uniformly in gateway handler"
+  },
+  "results": [
+    {
+      "name": "TurboAPI",
+      "slug": "turboapi",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "failed",
+      "rounds": [],
+      "error": "server not ready: process exited with -4"
+    },
+    {
+      "name": "FastPySGI",
+      "slug": "fastpysgi",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1878.27,
+          "p50": "49.42ms",
+          "p90": "63.61ms",
+          "p99": "1.35s",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1875.04,
+          "p50": "47.61ms",
+          "p90": "83.98ms",
+          "p99": "1.35s",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1876.655,
+      "min_rps": 1875.04,
+      "max_rps": 1878.27,
+      "p50": "49.42ms",
+      "p90": "63.61ms",
+      "p99": "1.35s",
+      "non_2xx": 0
+    },
+    {
+      "name": "Dreaming Electric Sheep",
+      "slug": "des",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 2050.81,
+          "p50": "61.89ms",
+          "p90": "63.75ms",
+          "p99": "64.24ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 2039.38,
+          "p50": "61.36ms",
+          "p90": "63.16ms",
+          "p99": "82.72ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 2045.095,
+      "min_rps": 2039.38,
+      "max_rps": 2050.81,
+      "p50": "61.89ms",
+      "p90": "63.75ms",
+      "p99": "64.24ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Granian raw RSGI",
+      "slug": "granian_rsgi",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1953.17,
+          "p50": "65.22ms",
+          "p90": "67.34ms",
+          "p99": "69.02ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1925.84,
+          "p50": "65.70ms",
+          "p90": "67.45ms",
+          "p99": "74.98ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1939.505,
+      "min_rps": 1925.84,
+      "max_rps": 1953.17,
+      "p50": "65.22ms",
+      "p90": "67.34ms",
+      "p99": "69.02ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Uvicorn raw ASGI",
+      "slug": "uvicorn_raw",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 2205.6,
+          "p50": "57.41ms",
+          "p90": "64.43ms",
+          "p99": "169.79ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 2243.83,
+          "p50": "56.28ms",
+          "p90": "64.07ms",
+          "p99": "204.50ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 2224.715,
+      "min_rps": 2205.6,
+      "max_rps": 2243.83,
+      "p50": "56.28ms",
+      "p90": "64.07ms",
+      "p99": "204.50ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Jero + Granian",
+      "slug": "jero_granian",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 2042.43,
+          "p50": "62.24ms",
+          "p90": "64.15ms",
+          "p99": "66.29ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 2004.94,
+          "p50": "62.97ms",
+          "p90": "64.96ms",
+          "p99": "73.86ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 2023.685,
+      "min_rps": 2004.94,
+      "max_rps": 2042.43,
+      "p50": "62.97ms",
+      "p90": "64.96ms",
+      "p99": "73.86ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Sanic",
+      "slug": "sanic",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 2209.59,
+          "p50": "56.59ms",
+          "p90": "60.96ms",
+          "p99": "125.85ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 2287.07,
+          "p50": "53.21ms",
+          "p90": "61.19ms",
+          "p99": "148.68ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 2248.33,
+      "min_rps": 2209.59,
+      "max_rps": 2287.07,
+      "p50": "56.59ms",
+      "p90": "60.96ms",
+      "p99": "125.85ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "BustAPI",
+      "slug": "bustapi",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1513.72,
+          "p50": "83.60ms",
+          "p90": "90.79ms",
+          "p99": "99.68ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1492.17,
+          "p50": "83.99ms",
+          "p90": "90.97ms",
+          "p99": "120.60ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1502.9450000000002,
+      "min_rps": 1492.17,
+      "max_rps": 1513.72,
+      "p50": "83.60ms",
+      "p90": "90.79ms",
+      "p99": "99.68ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "BlackSheep + Granian",
+      "slug": "blacksheep_granian",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1824.9,
+          "p50": "69.74ms",
+          "p90": "71.19ms",
+          "p99": "73.44ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1824.36,
+          "p50": "69.17ms",
+          "p90": "70.94ms",
+          "p99": "81.73ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1824.63,
+      "min_rps": 1824.36,
+      "max_rps": 1824.9,
+      "p50": "69.74ms",
+      "p90": "71.19ms",
+      "p99": "73.44ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Starlette + Granian",
+      "slug": "starlette_granian",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1822.05,
+          "p50": "69.66ms",
+          "p90": "71.57ms",
+          "p99": "74.09ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1795.91,
+          "p50": "70.07ms",
+          "p90": "71.96ms",
+          "p99": "86.61ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1808.98,
+      "min_rps": 1795.91,
+      "max_rps": 1822.05,
+      "p50": "69.66ms",
+      "p90": "71.57ms",
+      "p99": "74.09ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "aiohttp",
+      "slug": "aiohttp",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1934.11,
+          "p50": "65.24ms",
+          "p90": "69.45ms",
+          "p99": "73.25ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1870.36,
+          "p50": "66.89ms",
+          "p90": "70.78ms",
+          "p99": "104.48ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1902.235,
+      "min_rps": 1870.36,
+      "max_rps": 1934.11,
+      "p50": "65.24ms",
+      "p90": "69.45ms",
+      "p99": "73.25ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Emmett + Granian",
+      "slug": "emmett_granian",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1837.79,
+          "p50": "69.25ms",
+          "p90": "71.23ms",
+          "p99": "74.50ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1777.78,
+          "p50": "70.82ms",
+          "p90": "72.78ms",
+          "p99": "92.49ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1807.7849999999999,
+      "min_rps": 1777.78,
+      "max_rps": 1837.79,
+      "p50": "70.82ms",
+      "p90": "72.78ms",
+      "p99": "92.49ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Falcon + Granian",
+      "slug": "falcon_granian",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1739.48,
+          "p50": "73.25ms",
+          "p90": "75.96ms",
+          "p99": "78.62ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1729.56,
+          "p50": "72.86ms",
+          "p90": "75.51ms",
+          "p99": "93.42ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1734.52,
+      "min_rps": 1729.56,
+      "max_rps": 1739.48,
+      "p50": "73.25ms",
+      "p90": "75.96ms",
+      "p99": "78.62ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Robyn",
+      "slug": "robyn",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1659.88,
+          "p50": "73.08ms",
+          "p90": "87.45ms",
+          "p99": "104.33ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1661.0,
+          "p50": "73.09ms",
+          "p90": "87.53ms",
+          "p99": "96.42ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1660.44,
+      "min_rps": 1659.88,
+      "max_rps": 1661.0,
+      "p50": "73.08ms",
+      "p90": "87.45ms",
+      "p99": "104.33ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Litestar + Granian",
+      "slug": "litestar_granian",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1822.75,
+          "p50": "69.74ms",
+          "p90": "71.14ms",
+          "p99": "73.48ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1805.45,
+          "p50": "69.93ms",
+          "p90": "71.64ms",
+          "p99": "77.50ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1814.1,
+      "min_rps": 1805.45,
+      "max_rps": 1822.75,
+      "p50": "69.93ms",
+      "p90": "71.64ms",
+      "p99": "77.50ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "FastAPI + Granian",
+      "slug": "fastapi_granian",
+      "scenario": "0ms / 100 rows",
+      "delay_ms": 0,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 881.72,
+          "p50": "143.49ms",
+          "p90": "146.85ms",
+          "p99": "151.90ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 865.68,
+          "p50": "142.50ms",
+          "p90": "145.60ms",
+          "p99": "232.38ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 873.7,
+      "min_rps": 865.68,
+      "max_rps": 881.72,
+      "p50": "143.49ms",
+      "p90": "146.85ms",
+      "p99": "151.90ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "TurboAPI",
+      "slug": "turboapi",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "failed",
+      "rounds": [],
+      "error": "server not ready: process exited with -4"
+    },
+    {
+      "name": "FastPySGI",
+      "slug": "fastpysgi",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 166.83,
+          "p50": "148.73ms",
+          "p90": "201.23ms",
+          "p99": "1.20s",
+          "non_2xx": 0
+        },
+        {
+          "rps": 143.12,
+          "p50": "142.76ms",
+          "p90": "184.34ms",
+          "p99": "1.41s",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 154.97500000000002,
+      "min_rps": 143.12,
+      "max_rps": 166.83,
+      "p50": "148.73ms",
+      "p90": "201.23ms",
+      "p99": "1.20s",
+      "non_2xx": 0
+    },
+    {
+      "name": "Dreaming Electric Sheep",
+      "slug": "des",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 168.66,
+          "p50": "725.60ms",
+          "p90": "726.53ms",
+          "p99": "860.87ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 144.25,
+          "p50": "727.83ms",
+          "p90": "1.12s",
+          "p99": "1.41s",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 156.45499999999998,
+      "min_rps": 144.25,
+      "max_rps": 168.66,
+      "p50": "727.83ms",
+      "p90": "1.12s",
+      "p99": "1.41s",
+      "non_2xx": 0
+    },
+    {
+      "name": "Granian raw RSGI",
+      "slug": "granian_rsgi",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1999.01,
+          "p50": "63.70ms",
+          "p90": "67.86ms",
+          "p99": "71.62ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1942.83,
+          "p50": "64.85ms",
+          "p90": "69.44ms",
+          "p99": "80.19ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1970.92,
+      "min_rps": 1942.83,
+      "max_rps": 1999.01,
+      "p50": "63.70ms",
+      "p90": "67.86ms",
+      "p99": "71.62ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Uvicorn raw ASGI",
+      "slug": "uvicorn_raw",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 2413.23,
+          "p50": "51.47ms",
+          "p90": "62.87ms",
+          "p99": "86.42ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 2337.41,
+          "p50": "52.20ms",
+          "p90": "63.91ms",
+          "p99": "162.24ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 2375.3199999999997,
+      "min_rps": 2337.41,
+      "max_rps": 2413.23,
+      "p50": "52.20ms",
+      "p90": "63.91ms",
+      "p99": "162.24ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Jero + Granian",
+      "slug": "jero_granian",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 2056.56,
+          "p50": "61.61ms",
+          "p90": "66.49ms",
+          "p99": "69.65ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 2028.21,
+          "p50": "62.14ms",
+          "p90": "66.98ms",
+          "p99": "72.18ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 2042.385,
+      "min_rps": 2028.21,
+      "max_rps": 2056.56,
+      "p50": "61.61ms",
+      "p90": "66.49ms",
+      "p99": "69.65ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Sanic",
+      "slug": "sanic",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 2457.99,
+          "p50": "49.90ms",
+          "p90": "58.76ms",
+          "p99": "71.13ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 2386.1,
+          "p50": "50.77ms",
+          "p90": "59.35ms",
+          "p99": "84.37ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 2422.045,
+      "min_rps": 2386.1,
+      "max_rps": 2457.99,
+      "p50": "49.90ms",
+      "p90": "58.76ms",
+      "p99": "71.13ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "BustAPI",
+      "slug": "bustapi",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1502.79,
+          "p50": "84.26ms",
+          "p90": "92.15ms",
+          "p99": "101.16ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1494.23,
+          "p50": "83.81ms",
+          "p90": "92.35ms",
+          "p99": "125.63ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1498.51,
+      "min_rps": 1494.23,
+      "max_rps": 1502.79,
+      "p50": "84.26ms",
+      "p90": "92.15ms",
+      "p99": "101.16ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "BlackSheep + Granian",
+      "slug": "blacksheep_granian",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1865.77,
+          "p50": "67.99ms",
+          "p90": "72.59ms",
+          "p99": "78.76ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1859.92,
+          "p50": "68.12ms",
+          "p90": "72.64ms",
+          "p99": "84.38ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1862.845,
+      "min_rps": 1859.92,
+      "max_rps": 1865.77,
+      "p50": "67.99ms",
+      "p90": "72.59ms",
+      "p99": "78.76ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Starlette + Granian",
+      "slug": "starlette_granian",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1813.27,
+          "p50": "69.79ms",
+          "p90": "75.29ms",
+          "p99": "90.67ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1809.69,
+          "p50": "69.76ms",
+          "p90": "75.01ms",
+          "p99": "83.84ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1811.48,
+      "min_rps": 1809.69,
+      "max_rps": 1813.27,
+      "p50": "69.79ms",
+      "p90": "75.29ms",
+      "p99": "90.67ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "aiohttp",
+      "slug": "aiohttp",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1919.45,
+          "p50": "67.08ms",
+          "p90": "69.31ms",
+          "p99": "74.72ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1937.89,
+          "p50": "64.56ms",
+          "p90": "68.88ms",
+          "p99": "90.30ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1928.67,
+      "min_rps": 1919.45,
+      "max_rps": 1937.89,
+      "p50": "67.08ms",
+      "p90": "69.31ms",
+      "p99": "74.72ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Emmett + Granian",
+      "slug": "emmett_granian",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1851.29,
+          "p50": "68.65ms",
+          "p90": "73.06ms",
+          "p99": "78.90ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1862.39,
+          "p50": "67.54ms",
+          "p90": "72.56ms",
+          "p99": "83.10ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1856.8400000000001,
+      "min_rps": 1851.29,
+      "max_rps": 1862.39,
+      "p50": "67.54ms",
+      "p90": "72.56ms",
+      "p99": "83.10ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Falcon + Granian",
+      "slug": "falcon_granian",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1762.94,
+          "p50": "71.56ms",
+          "p90": "77.37ms",
+          "p99": "92.11ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1736.41,
+          "p50": "72.65ms",
+          "p90": "78.30ms",
+          "p99": "92.50ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1749.6750000000002,
+      "min_rps": 1736.41,
+      "max_rps": 1762.94,
+      "p50": "71.56ms",
+      "p90": "77.37ms",
+      "p99": "92.11ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Robyn",
+      "slug": "robyn",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1703.2,
+          "p50": "71.44ms",
+          "p90": "86.41ms",
+          "p99": "97.91ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1713.6,
+          "p50": "71.36ms",
+          "p90": "85.19ms",
+          "p99": "102.55ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1708.4,
+      "min_rps": 1703.2,
+      "max_rps": 1713.6,
+      "p50": "71.36ms",
+      "p90": "85.19ms",
+      "p99": "102.55ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Litestar + Granian",
+      "slug": "litestar_granian",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1858.6,
+          "p50": "68.28ms",
+          "p90": "73.08ms",
+          "p99": "78.24ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1865.85,
+          "p50": "67.83ms",
+          "p90": "73.51ms",
+          "p99": "81.44ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1862.225,
+      "min_rps": 1858.6,
+      "max_rps": 1865.85,
+      "p50": "68.28ms",
+      "p90": "73.08ms",
+      "p99": "78.24ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "FastAPI + Granian",
+      "slug": "fastapi_granian",
+      "scenario": "5ms / 100 rows",
+      "delay_ms": 5,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 895.52,
+          "p50": "140.88ms",
+          "p90": "147.31ms",
+          "p99": "162.25ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 867.52,
+          "p50": "141.63ms",
+          "p90": "150.85ms",
+          "p99": "237.15ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 881.52,
+      "min_rps": 867.52,
+      "max_rps": 895.52,
+      "p50": "140.88ms",
+      "p90": "147.31ms",
+      "p99": "162.25ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "TurboAPI",
+      "slug": "turboapi",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "failed",
+      "rounds": [],
+      "error": "server not ready: process exited with -4"
+    },
+    {
+      "name": "FastPySGI",
+      "slug": "fastpysgi",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 40.17,
+          "p50": "270.02ms",
+          "p90": "498.98ms",
+          "p99": "1.60s",
+          "non_2xx": 0
+        },
+        {
+          "rps": 16.22,
+          "p50": "167.02ms",
+          "p90": "229.69ms",
+          "p99": "396.84ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 28.195,
+      "min_rps": 16.22,
+      "max_rps": 40.17,
+      "p50": "270.02ms",
+      "p90": "498.98ms",
+      "p99": "1.60s",
+      "non_2xx": 0
+    },
+    {
+      "name": "Dreaming Electric Sheep",
+      "slug": "des",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 40.17,
+          "p50": "1.33s",
+          "p90": "1.87s",
+          "p99": "2.00s",
+          "non_2xx": 0
+        },
+        {
+          "rps": 15.97,
+          "p50": "0.00us",
+          "p90": "0.00us",
+          "p99": "0.00us",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 28.07,
+      "min_rps": 15.97,
+      "max_rps": 40.17,
+      "p50": "0.00us",
+      "p90": "0.00us",
+      "p99": "0.00us",
+      "non_2xx": 0
+    },
+    {
+      "name": "Granian raw RSGI",
+      "slug": "granian_rsgi",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1925.88,
+          "p50": "66.77ms",
+          "p90": "71.45ms",
+          "p99": "73.79ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1916.02,
+          "p50": "66.58ms",
+          "p90": "70.53ms",
+          "p99": "82.90ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1920.95,
+      "min_rps": 1916.02,
+      "max_rps": 1925.88,
+      "p50": "66.77ms",
+      "p90": "71.45ms",
+      "p99": "73.79ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Uvicorn raw ASGI",
+      "slug": "uvicorn_raw",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1849.43,
+          "p50": "68.65ms",
+          "p90": "77.26ms",
+          "p99": "96.95ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1852.14,
+          "p50": "68.68ms",
+          "p90": "82.32ms",
+          "p99": "93.03ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1850.785,
+      "min_rps": 1849.43,
+      "max_rps": 1852.14,
+      "p50": "68.65ms",
+      "p90": "77.26ms",
+      "p99": "96.95ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Jero + Granian",
+      "slug": "jero_granian",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 2015.87,
+          "p50": "63.77ms",
+          "p90": "66.65ms",
+          "p99": "69.47ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 2017.76,
+          "p50": "63.78ms",
+          "p90": "67.35ms",
+          "p99": "70.70ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 2016.815,
+      "min_rps": 2015.87,
+      "max_rps": 2017.76,
+      "p50": "63.78ms",
+      "p90": "67.35ms",
+      "p99": "70.70ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Sanic",
+      "slug": "sanic",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1864.36,
+          "p50": "65.85ms",
+          "p90": "77.76ms",
+          "p99": "94.63ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1900.08,
+          "p50": "63.65ms",
+          "p90": "75.82ms",
+          "p99": "94.53ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1882.2199999999998,
+      "min_rps": 1864.36,
+      "max_rps": 1900.08,
+      "p50": "65.85ms",
+      "p90": "77.76ms",
+      "p99": "94.63ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "BustAPI",
+      "slug": "bustapi",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1453.96,
+          "p50": "86.82ms",
+          "p90": "98.30ms",
+          "p99": "113.65ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1459.44,
+          "p50": "85.75ms",
+          "p90": "99.62ms",
+          "p99": "126.68ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1456.7,
+      "min_rps": 1453.96,
+      "max_rps": 1459.44,
+      "p50": "86.82ms",
+      "p90": "98.30ms",
+      "p99": "113.65ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "BlackSheep + Granian",
+      "slug": "blacksheep_granian",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1823.69,
+          "p50": "69.93ms",
+          "p90": "74.90ms",
+          "p99": "84.75ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1810.69,
+          "p50": "70.71ms",
+          "p90": "74.37ms",
+          "p99": "79.86ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1817.19,
+      "min_rps": 1810.69,
+      "max_rps": 1823.69,
+      "p50": "69.93ms",
+      "p90": "74.90ms",
+      "p99": "84.75ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Starlette + Granian",
+      "slug": "starlette_granian",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1791.49,
+          "p50": "71.46ms",
+          "p90": "75.92ms",
+          "p99": "84.79ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1748.11,
+          "p50": "72.50ms",
+          "p90": "77.64ms",
+          "p99": "105.92ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1769.8,
+      "min_rps": 1748.11,
+      "max_rps": 1791.49,
+      "p50": "71.46ms",
+      "p90": "75.92ms",
+      "p99": "84.79ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "aiohttp",
+      "slug": "aiohttp",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1889.16,
+          "p50": "66.39ms",
+          "p90": "75.11ms",
+          "p99": "80.96ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1831.29,
+          "p50": "67.97ms",
+          "p90": "75.94ms",
+          "p99": "112.50ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1860.225,
+      "min_rps": 1831.29,
+      "max_rps": 1889.16,
+      "p50": "67.97ms",
+      "p90": "75.94ms",
+      "p99": "112.50ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Emmett + Granian",
+      "slug": "emmett_granian",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1814.14,
+          "p50": "71.18ms",
+          "p90": "76.11ms",
+          "p99": "84.40ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1807.22,
+          "p50": "71.21ms",
+          "p90": "75.34ms",
+          "p99": "93.06ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1810.68,
+      "min_rps": 1807.22,
+      "max_rps": 1814.14,
+      "p50": "71.18ms",
+      "p90": "76.11ms",
+      "p99": "84.40ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Falcon + Granian",
+      "slug": "falcon_granian",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1758.69,
+          "p50": "73.08ms",
+          "p90": "77.55ms",
+          "p99": "86.80ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1729.49,
+          "p50": "74.03ms",
+          "p90": "78.80ms",
+          "p99": "95.20ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1744.0900000000001,
+      "min_rps": 1729.49,
+      "max_rps": 1758.69,
+      "p50": "73.08ms",
+      "p90": "77.55ms",
+      "p99": "86.80ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Robyn",
+      "slug": "robyn",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1749.69,
+          "p50": "76.73ms",
+          "p90": "85.50ms",
+          "p99": "98.04ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1765.88,
+          "p50": "76.26ms",
+          "p90": "85.62ms",
+          "p99": "112.96ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1757.785,
+      "min_rps": 1749.69,
+      "max_rps": 1765.88,
+      "p50": "76.73ms",
+      "p90": "85.50ms",
+      "p99": "98.04ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Litestar + Granian",
+      "slug": "litestar_granian",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 1842.35,
+          "p50": "70.63ms",
+          "p90": "74.67ms",
+          "p99": "78.39ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 1801.01,
+          "p50": "71.61ms",
+          "p90": "76.35ms",
+          "p99": "85.17ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 1821.6799999999998,
+      "min_rps": 1801.01,
+      "max_rps": 1842.35,
+      "p50": "71.61ms",
+      "p90": "76.35ms",
+      "p99": "85.17ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "FastAPI + Granian",
+      "slug": "fastapi_granian",
+      "scenario": "20ms / 100 rows",
+      "delay_ms": 20,
+      "rows": 100,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 906.12,
+          "p50": "139.54ms",
+          "p90": "147.90ms",
+          "p99": "155.73ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 873.18,
+          "p50": "142.47ms",
+          "p90": "149.61ms",
+          "p99": "221.40ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 889.65,
+      "min_rps": 873.18,
+      "max_rps": 906.12,
+      "p50": "139.54ms",
+      "p90": "147.90ms",
+      "p99": "155.73ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "TurboAPI",
+      "slug": "turboapi",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "failed",
+      "rounds": [],
+      "error": "server not ready: process exited with -4"
+    },
+    {
+      "name": "FastPySGI",
+      "slug": "fastpysgi",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 116.09,
+          "p50": "177.28ms",
+          "p90": "240.03ms",
+          "p99": "1.35s",
+          "non_2xx": 0
+        },
+        {
+          "rps": 92.12,
+          "p50": "154.99ms",
+          "p90": "216.31ms",
+          "p99": "1.65s",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 104.105,
+      "min_rps": 92.12,
+      "max_rps": 116.09,
+      "p50": "177.28ms",
+      "p90": "240.03ms",
+      "p99": "1.35s",
+      "non_2xx": 0
+    },
+    {
+      "name": "Dreaming Electric Sheep",
+      "slug": "des",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 120.24,
+          "p50": "996.25ms",
+          "p90": "1.01s",
+          "p99": "1.20s",
+          "non_2xx": 0
+        },
+        {
+          "rps": 96.99,
+          "p50": "992.78ms",
+          "p90": "1.69s",
+          "p99": "1.96s",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 108.615,
+      "min_rps": 96.99,
+      "max_rps": 120.24,
+      "p50": "996.25ms",
+      "p90": "1.01s",
+      "p99": "1.20s",
+      "non_2xx": 0
+    },
+    {
+      "name": "Granian raw RSGI",
+      "slug": "granian_rsgi",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 342.35,
+          "p50": "365.28ms",
+          "p90": "370.20ms",
+          "p99": "421.04ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 318.8,
+          "p50": "365.83ms",
+          "p90": "372.02ms",
+          "p99": "680.23ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 330.57500000000005,
+      "min_rps": 318.8,
+      "max_rps": 342.35,
+      "p50": "365.28ms",
+      "p90": "370.20ms",
+      "p99": "421.04ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Uvicorn raw ASGI",
+      "slug": "uvicorn_raw",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 347.28,
+          "p50": "243.98ms",
+          "p90": "351.57ms",
+          "p99": "1.44s",
+          "non_2xx": 0
+        },
+        {
+          "rps": 323.15,
+          "p50": "230.41ms",
+          "p90": "337.31ms",
+          "p99": "1.48s",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 335.215,
+      "min_rps": 323.15,
+      "max_rps": 347.28,
+      "p50": "243.98ms",
+      "p90": "351.57ms",
+      "p99": "1.44s",
+      "non_2xx": 0
+    },
+    {
+      "name": "Jero + Granian",
+      "slug": "jero_granian",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 377.37,
+          "p50": "332.06ms",
+          "p90": "334.71ms",
+          "p99": "376.03ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 356.86,
+          "p50": "331.11ms",
+          "p90": "336.86ms",
+          "p99": "607.55ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 367.115,
+      "min_rps": 356.86,
+      "max_rps": 377.37,
+      "p50": "332.06ms",
+      "p90": "334.71ms",
+      "p99": "376.03ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Sanic",
+      "slug": "sanic",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 362.82,
+          "p50": "228.07ms",
+          "p90": "352.02ms",
+          "p99": "1.57s",
+          "non_2xx": 0
+        },
+        {
+          "rps": 355.36,
+          "p50": "241.73ms",
+          "p90": "346.27ms",
+          "p99": "1.59s",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 359.09000000000003,
+      "min_rps": 355.36,
+      "max_rps": 362.82,
+      "p50": "228.07ms",
+      "p90": "352.02ms",
+      "p99": "1.57s",
+      "non_2xx": 0
+    },
+    {
+      "name": "BustAPI",
+      "slug": "bustapi",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 308.19,
+          "p50": "401.96ms",
+          "p90": "433.43ms",
+          "p99": "492.98ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 288.87,
+          "p50": "407.43ms",
+          "p90": "466.72ms",
+          "p99": "738.42ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 298.53,
+      "min_rps": 288.87,
+      "max_rps": 308.19,
+      "p50": "407.43ms",
+      "p90": "466.72ms",
+      "p99": "738.42ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "BlackSheep + Granian",
+      "slug": "blacksheep_granian",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 330.11,
+          "p50": "376.02ms",
+          "p90": "391.36ms",
+          "p99": "433.18ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 308.22,
+          "p50": "377.95ms",
+          "p90": "384.45ms",
+          "p99": "691.36ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 319.165,
+      "min_rps": 308.22,
+      "max_rps": 330.11,
+      "p50": "376.02ms",
+      "p90": "391.36ms",
+      "p99": "433.18ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Starlette + Granian",
+      "slug": "starlette_granian",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 332.41,
+          "p50": "373.77ms",
+          "p90": "383.47ms",
+          "p99": "435.20ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 307.38,
+          "p50": "376.61ms",
+          "p90": "400.33ms",
+          "p99": "695.30ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 319.895,
+      "min_rps": 307.38,
+      "max_rps": 332.41,
+      "p50": "376.61ms",
+      "p90": "400.33ms",
+      "p99": "695.30ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "aiohttp",
+      "slug": "aiohttp",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 333.69,
+          "p50": "372.29ms",
+          "p90": "378.10ms",
+          "p99": "431.79ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 308.01,
+          "p50": "375.43ms",
+          "p90": "406.35ms",
+          "p99": "719.62ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 320.85,
+      "min_rps": 308.01,
+      "max_rps": 333.69,
+      "p50": "372.29ms",
+      "p90": "378.10ms",
+      "p99": "431.79ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Emmett + Granian",
+      "slug": "emmett_granian",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 331.59,
+          "p50": "376.43ms",
+          "p90": "382.04ms",
+          "p99": "436.03ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 308.57,
+          "p50": "376.34ms",
+          "p90": "391.69ms",
+          "p99": "707.07ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 320.08,
+      "min_rps": 308.57,
+      "max_rps": 331.59,
+      "p50": "376.43ms",
+      "p90": "382.04ms",
+      "p99": "436.03ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Falcon + Granian",
+      "slug": "falcon_granian",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 328.59,
+          "p50": "378.95ms",
+          "p90": "385.69ms",
+          "p99": "437.12ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 303.17,
+          "p50": "382.69ms",
+          "p90": "396.17ms",
+          "p99": "716.36ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 315.88,
+      "min_rps": 303.17,
+      "max_rps": 328.59,
+      "p50": "378.95ms",
+      "p90": "385.69ms",
+      "p99": "437.12ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Robyn",
+      "slug": "robyn",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 303.25,
+          "p50": "387.63ms",
+          "p90": "453.23ms",
+          "p99": "642.29ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 311.37,
+          "p50": "384.00ms",
+          "p90": "457.46ms",
+          "p99": "685.77ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 307.31,
+      "min_rps": 303.25,
+      "max_rps": 311.37,
+      "p50": "387.63ms",
+      "p90": "453.23ms",
+      "p99": "642.29ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "Litestar + Granian",
+      "slug": "litestar_granian",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 369.14,
+          "p50": "337.73ms",
+          "p90": "343.72ms",
+          "p99": "389.91ms",
+          "non_2xx": 0
+        },
+        {
+          "rps": 346.84,
+          "p50": "338.16ms",
+          "p90": "357.59ms",
+          "p99": "625.56ms",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 357.99,
+      "min_rps": 346.84,
+      "max_rps": 369.14,
+      "p50": "337.73ms",
+      "p90": "343.72ms",
+      "p99": "389.91ms",
+      "non_2xx": 0
+    },
+    {
+      "name": "FastAPI + Granian",
+      "slug": "fastapi_granian",
+      "scenario": "5ms / 1000 rows",
+      "delay_ms": 5,
+      "rows": 1000,
+      "status": "ok",
+      "rounds": [
+        {
+          "rps": 123.56,
+          "p50": "967.46ms",
+          "p90": "986.86ms",
+          "p99": "1.21s",
+          "non_2xx": 0
+        },
+        {
+          "rps": 99.35,
+          "p50": "988.48ms",
+          "p90": "1.61s",
+          "p99": "1.88s",
+          "non_2xx": 0
+        }
+      ],
+      "median_rps": 111.455,
+      "min_rps": 99.35,
+      "max_rps": 123.56,
+      "p50": "967.46ms",
+      "p90": "986.86ms",
+      "p99": "1.21s",
+      "non_2xx": 0
+    }
+  ]
+}
