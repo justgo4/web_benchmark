@@ -161,7 +161,7 @@ elif KIND == "robyn":
         return PAYLOAD_TEXT
 
     if __name__ == "__main__":
-        app.start(url="127.0.0.1", port=8000)
+        app.start(host="127.0.0.1", port=8000)
 
 
 elif KIND == "sanic":
