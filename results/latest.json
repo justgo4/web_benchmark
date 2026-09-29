@@ -1,0 +1,489 @@
+{
+  "meta": {
+    "timestamp_utc": "2026-09-29T16:51:57.157600+00:00",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "cpu_model": "AMD EPYC 7763 64-Core Processor",
+    "logical_cpus": 4,
+    "github_runner": "GitHub Actions 1000000927",
+    "github_run_id": "36600143812",
+    "github_sha": "ddc48ffbcde4856c3227400693c89d6c169923dc",
+    "rounds": 3,
+    "duration_seconds": 6,
+    "connections": 128,
+    "threads": 2
+  },
+  "results": [
+    {
+      "name": "Granian raw RSGI",
+      "slug": "granian_rsgi",
+      "category": "server ceiling",
+      "python": "3.13",
+      "status": "ok",
+      "version": "2.8.3",
+      "rounds": [
+        {
+          "rps": 39088.37,
+          "p50": "3.38ms",
+          "p90": "3.93ms",
+          "p99": "4.42ms"
+        },
+        {
+          "rps": 38592.25,
+          "p50": "3.42ms",
+          "p90": "3.92ms",
+          "p99": "4.30ms"
+        },
+        {
+          "rps": 39243.96,
+          "p50": "3.36ms",
+          "p90": "3.90ms",
+          "p99": "4.31ms"
+        }
+      ],
+      "median_rps": 39088.37,
+      "min_rps": 38592.25,
+      "max_rps": 39243.96,
+      "p50": "3.38ms",
+      "p90": "3.93ms",
+      "p99": "4.42ms"
+    },
+    {
+      "name": "Uvicorn raw ASGI",
+      "slug": "uvicorn_raw",
+      "category": "server ceiling",
+      "python": "3.13",
+      "status": "ok",
+      "version": "0.54.0",
+      "rounds": [
+        {
+          "rps": 37000.68,
+          "p50": "3.11ms",
+          "p90": "4.28ms",
+          "p99": "24.19ms"
+        },
+        {
+          "rps": 37069.41,
+          "p50": "3.10ms",
+          "p90": "3.83ms",
+          "p99": "7.47ms"
+        },
+        {
+          "rps": 33691.93,
+          "p50": "3.27ms",
+          "p90": "5.74ms",
+          "p99": "17.41ms"
+        }
+      ],
+      "median_rps": 37000.68,
+      "min_rps": 33691.93,
+      "max_rps": 37069.41,
+      "p50": "3.11ms",
+      "p90": "4.28ms",
+      "p99": "24.19ms"
+    },
+    {
+      "name": "FastPySGI WSGI",
+      "slug": "fastpysgi",
+      "category": "server ceiling",
+      "python": "3.13",
+      "status": "ok",
+      "version": "0.6",
+      "rounds": [
+        {
+          "rps": 71596.42,
+          "p50": "1.58ms",
+          "p90": "2.80ms",
+          "p99": "2.89ms"
+        },
+        {
+          "rps": 75464.1,
+          "p50": "1.58ms",
+          "p90": "1.89ms",
+          "p99": "2.12ms"
+        },
+        {
+          "rps": 77365.65,
+          "p50": "1.57ms",
+          "p90": "1.87ms",
+          "p99": "1.95ms"
+        }
+      ],
+      "median_rps": 75464.1,
+      "min_rps": 71596.42,
+      "max_rps": 77365.65,
+      "p50": "1.58ms",
+      "p90": "1.89ms",
+      "p99": "2.12ms"
+    },
+    {
+      "name": "BustAPI",
+      "slug": "bustapi",
+      "category": "framework",
+      "python": "3.13",
+      "status": "ok",
+      "version": "0.15.0",
+      "rounds": [
+        {
+          "rps": 15533.68,
+          "p50": "8.93ms",
+          "p90": "25.61ms",
+          "p99": "51.08ms"
+        },
+        {
+          "rps": 15179.91,
+          "p50": "8.71ms",
+          "p90": "25.76ms",
+          "p99": "51.25ms"
+        },
+        {
+          "rps": 15555.49,
+          "p50": "8.95ms",
+          "p90": "25.62ms",
+          "p99": "51.31ms"
+        }
+      ],
+      "median_rps": 15533.68,
+      "min_rps": 15179.91,
+      "max_rps": 15555.49,
+      "p50": "8.93ms",
+      "p90": "25.61ms",
+      "p99": "51.08ms"
+    },
+    {
+      "name": "Falcon + Granian",
+      "slug": "falcon_granian",
+      "category": "framework",
+      "python": "3.13",
+      "status": "ok",
+      "version": "4.3.1",
+      "rounds": [
+        {
+          "rps": 10648.54,
+          "p50": "12.05ms",
+          "p90": "12.95ms",
+          "p99": "13.87ms"
+        },
+        {
+          "rps": 10888.89,
+          "p50": "11.72ms",
+          "p90": "12.96ms",
+          "p99": "13.51ms"
+        },
+        {
+          "rps": 10697.19,
+          "p50": "11.87ms",
+          "p90": "13.21ms",
+          "p99": "14.88ms"
+        }
+      ],
+      "median_rps": 10697.19,
+      "min_rps": 10648.54,
+      "max_rps": 10888.89,
+      "p50": "11.87ms",
+      "p90": "13.21ms",
+      "p99": "14.88ms"
+    },
+    {
+      "name": "Emmett + Granian",
+      "slug": "emmett_granian",
+      "category": "framework",
+      "python": "3.13",
+      "status": "ok",
+      "version": "2.8.1",
+      "rounds": [
+        {
+          "rps": 12104.47,
+          "p50": "10.66ms",
+          "p90": "11.00ms",
+          "p99": "11.57ms"
+        },
+        {
+          "rps": 12210.23,
+          "p50": "10.60ms",
+          "p90": "11.05ms",
+          "p99": "12.45ms"
+        },
+        {
+          "rps": 12135.35,
+          "p50": "10.63ms",
+          "p90": "10.93ms",
+          "p99": "11.19ms"
+        }
+      ],
+      "median_rps": 12135.35,
+      "min_rps": 12104.47,
+      "max_rps": 12210.23,
+      "p50": "10.63ms",
+      "p90": "10.93ms",
+      "p99": "11.19ms"
+    },
+    {
+      "name": "BlackSheep + Granian",
+      "slug": "blacksheep_granian",
+      "category": "framework",
+      "python": "3.13",
+      "status": "ok",
+      "version": "2.6.3",
+      "rounds": [
+        {
+          "rps": 13955.7,
+          "p50": "9.16ms",
+          "p90": "10.02ms",
+          "p99": "10.50ms"
+        },
+        {
+          "rps": 14008.71,
+          "p50": "9.12ms",
+          "p90": "10.06ms",
+          "p99": "12.09ms"
+        },
+        {
+          "rps": 14030.22,
+          "p50": "9.20ms",
+          "p90": "10.20ms",
+          "p99": "11.03ms"
+        }
+      ],
+      "median_rps": 14008.71,
+      "min_rps": 13955.7,
+      "max_rps": 14030.22,
+      "p50": "9.12ms",
+      "p90": "10.06ms",
+      "p99": "12.09ms"
+    },
+    {
+      "name": "Starlette + Granian",
+      "slug": "starlette_granian",
+      "category": "framework",
+      "python": "3.13",
+      "status": "ok",
+      "version": "1.7.0",
+      "rounds": [
+        {
+          "rps": 12906.11,
+          "p50": "9.93ms",
+          "p90": "11.00ms",
+          "p99": "12.03ms"
+        },
+        {
+          "rps": 12714.09,
+          "p50": "10.20ms",
+          "p90": "11.13ms",
+          "p99": "11.64ms"
+        },
+        {
+          "rps": 12634.26,
+          "p50": "10.30ms",
+          "p90": "11.14ms",
+          "p99": "11.55ms"
+        }
+      ],
+      "median_rps": 12714.09,
+      "min_rps": 12634.26,
+      "max_rps": 12906.11,
+      "p50": "10.20ms",
+      "p90": "11.13ms",
+      "p99": "11.64ms"
+    },
+    {
+      "name": "Litestar + Granian",
+      "slug": "litestar_granian",
+      "category": "framework",
+      "python": "3.13",
+      "status": "ok",
+      "version": "2.24.0",
+      "rounds": [
+        {
+          "rps": 8125.17,
+          "p50": "16.04ms",
+          "p90": "16.94ms",
+          "p99": "20.91ms"
+        },
+        {
+          "rps": 8399.69,
+          "p50": "15.69ms",
+          "p90": "16.90ms",
+          "p99": "18.52ms"
+        },
+        {
+          "rps": 8355.37,
+          "p50": "15.57ms",
+          "p90": "16.56ms",
+          "p99": "17.36ms"
+        }
+      ],
+      "median_rps": 8355.37,
+      "min_rps": 8125.17,
+      "max_rps": 8399.69,
+      "p50": "15.57ms",
+      "p90": "16.56ms",
+      "p99": "17.36ms"
+    },
+    {
+      "name": "FastAPI + Granian",
+      "slug": "fastapi_granian",
+      "category": "framework",
+      "python": "3.13",
+      "status": "ok",
+      "version": "0.141.1",
+      "rounds": [
+        {
+          "rps": 7030.5,
+          "p50": "18.51ms",
+          "p90": "21.49ms",
+          "p99": "23.10ms"
+        },
+        {
+          "rps": 7005.96,
+          "p50": "18.45ms",
+          "p90": "21.22ms",
+          "p99": "21.80ms"
+        },
+        {
+          "rps": 7044.96,
+          "p50": "18.53ms",
+          "p90": "21.19ms",
+          "p99": "21.74ms"
+        }
+      ],
+      "median_rps": 7030.5,
+      "min_rps": 7005.96,
+      "max_rps": 7044.96,
+      "p50": "18.51ms",
+      "p90": "21.49ms",
+      "p99": "23.10ms"
+    },
+    {
+      "name": "Jero + Granian",
+      "slug": "jero_granian",
+      "category": "framework",
+      "python": "3.13",
+      "status": "ok",
+      "version": "0.1.3",
+      "rounds": [
+        {
+          "rps": 25959.8,
+          "p50": "4.99ms",
+          "p90": "5.53ms",
+          "p99": "6.24ms"
+        },
+        {
+          "rps": 25893.94,
+          "p50": "4.99ms",
+          "p90": "5.53ms",
+          "p99": "6.10ms"
+        },
+        {
+          "rps": 25838.32,
+          "p50": "5.01ms",
+          "p90": "5.57ms",
+          "p99": "6.22ms"
+        }
+      ],
+      "median_rps": 25893.94,
+      "min_rps": 25838.32,
+      "max_rps": 25959.8,
+      "p50": "4.99ms",
+      "p90": "5.53ms",
+      "p99": "6.10ms"
+    },
+    {
+      "name": "Dreaming Electric Sheep",
+      "slug": "des",
+      "category": "framework",
+      "python": "3.13",
+      "status": "failed",
+      "version": "1.2.1",
+      "rounds": [],
+      "error": "server exited with 1"
+    },
+    {
+      "name": "Robyn",
+      "slug": "robyn",
+      "category": "framework",
+      "python": "3.13",
+      "status": "failed",
+      "version": "0.88.0",
+      "rounds": [],
+      "error": "server exited with 1"
+    },
+    {
+      "name": "Sanic",
+      "slug": "sanic",
+      "category": "framework",
+      "python": "3.13",
+      "status": "ok",
+      "version": "25.12.1",
+      "rounds": [
+        {
+          "rps": 17411.72,
+          "p50": "7.06ms",
+          "p90": "9.21ms",
+          "p99": "132.69ms"
+        },
+        {
+          "rps": 18111.76,
+          "p50": "6.45ms",
+          "p90": "10.81ms",
+          "p99": "137.59ms"
+        },
+        {
+          "rps": 18622.95,
+          "p50": "5.83ms",
+          "p90": "10.70ms",
+          "p99": "133.45ms"
+        }
+      ],
+      "median_rps": 18111.76,
+      "min_rps": 17411.72,
+      "max_rps": 18622.95,
+      "p50": "6.45ms",
+      "p90": "10.81ms",
+      "p99": "137.59ms"
+    },
+    {
+      "name": "aiohttp",
+      "slug": "aiohttp",
+      "category": "framework",
+      "python": "3.13",
+      "status": "ok",
+      "version": "3.14.3",
+      "rounds": [
+        {
+          "rps": 12920.07,
+          "p50": "9.15ms",
+          "p90": "11.65ms",
+          "p99": "14.51ms"
+        },
+        {
+          "rps": 11840.45,
+          "p50": "11.19ms",
+          "p90": "12.48ms",
+          "p99": "13.82ms"
+        },
+        {
+          "rps": 11416.43,
+          "p50": "11.40ms",
+          "p90": "13.13ms",
+          "p99": "14.69ms"
+        }
+      ],
+      "median_rps": 11840.45,
+      "min_rps": 11416.43,
+      "max_rps": 12920.07,
+      "p50": "11.19ms",
+      "p90": "12.48ms",
+      "p99": "13.82ms"
+    },
+    {
+      "name": "TurboAPI (Python 3.14t)",
+      "slug": "turboapi",
+      "category": "framework-special-runtime",
+      "python": "3.14t",
+      "status": "failed",
+      "version": "1.0.35",
+      "rounds": [],
+      "error": "server exited with -4"
+    }
+  ]
+}
