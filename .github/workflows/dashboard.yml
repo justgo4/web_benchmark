@@ -38,7 +38,7 @@ jobs:
         env:
           DASHBOARD_STEADY_SECONDS: "3"
           DASHBOARD_STEADY_ROUNDS: "1"
-          DASHBOARD_BURST_ROUNDS: "1"
+          DASHBOARD_BURST_ROUNDS: "0"
           DASHBOARD_DELAYS_MS: "2,5"
         run: python dashboard_benchmark.py
 
