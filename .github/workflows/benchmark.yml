@@ -8,6 +8,9 @@ on:
       - RESULTS.md
       - CLIENT_RESULTS.md
       - STARROCKS_BENCHMARK.md
+      - DASHBOARD_BENCHMARK.md
+      - dashboard_*.py
+      - .github/workflows/dashboard.yml
       - results/**
 
 permissions:
