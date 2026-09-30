@@ -1,0 +1,484 @@
+{
+  "workload": {
+    "interfaces": 20,
+    "qps_per_interface": 200,
+    "aggregate_qps": 4000,
+    "rows_per_response": 10,
+    "workers": 4,
+    "steady_seconds": 3,
+    "burst": "4000 total requests scheduled inside 200ms",
+    "starrocks_query_cache": "modeled as repeated per-endpoint query with low upstream latency",
+    "local_api_cache": false,
+    "singleflight": false
+  },
+  "results": [
+    {
+      "name": "Flask + Gunicorn gthread",
+      "slug": "flask",
+      "delay_ms": 2,
+      "result": {
+        "status": "ok",
+        "steady": {
+          "throughput": 2830.8143332775003,
+          "success": 1,
+          "p50_ms": 708.8224,
+          "p95_ms": 1215.096089,
+          "p99_ms": 1263.235766,
+          "max_ms": 1334.419154
+        },
+        "burst": null,
+        "burst_error": null,
+        "passes_4000_qps": false,
+        "steady_rounds": [
+          {
+            "requests": 12000,
+            "target_rate": 4000,
+            "throughput": 2830.8143332775003,
+            "success": 1,
+            "p50_ms": 708.8224,
+            "p95_ms": 1215.096089,
+            "p99_ms": 1263.235766,
+            "max_ms": 1334.419154,
+            "status_codes": {
+              "200": 12000
+            },
+            "errors": []
+          }
+        ],
+        "burst_rounds": []
+      }
+    },
+    {
+      "name": "Quart + Granian",
+      "slug": "quart",
+      "delay_ms": 2,
+      "result": {
+        "status": "failed",
+        "error": "TimeoutExpired(['vegeta', 'attack', '-rate=4000/s', '-duration=3s', '-workers=64', '-max-workers=8192', '-targets=/home/runner/work/web_benchmark/web_benchmark/results/targets_steady.txt'], 20)"
+      }
+    },
+    {
+      "name": "Sanic",
+      "slug": "sanic",
+      "delay_ms": 2,
+      "result": {
+        "status": "ok",
+        "steady": {
+          "throughput": 3996.1381499428003,
+          "success": 1,
+          "p50_ms": 3.148772,
+          "p95_ms": 4.807205,
+          "p99_ms": 13.573113,
+          "max_ms": 33.780374
+        },
+        "burst": null,
+        "burst_error": null,
+        "passes_4000_qps": true,
+        "steady_rounds": [
+          {
+            "requests": 11999,
+            "target_rate": 4000,
+            "throughput": 3996.1381499428003,
+            "success": 1,
+            "p50_ms": 3.148772,
+            "p95_ms": 4.807205,
+            "p99_ms": 13.573113,
+            "max_ms": 33.780374,
+            "status_codes": {
+              "200": 11999
+            },
+            "errors": []
+          }
+        ],
+        "burst_rounds": []
+      }
+    },
+    {
+      "name": "BustAPI",
+      "slug": "bustapi",
+      "delay_ms": 2,
+      "result": {
+        "status": "failed",
+        "error": "TimeoutError('timed out')"
+      }
+    },
+    {
+      "name": "Jero + Granian",
+      "slug": "jero",
+      "delay_ms": 2,
+      "result": {
+        "status": "ok",
+        "steady": {
+          "throughput": 3995.1414884601763,
+          "success": 1,
+          "p50_ms": 3.407215,
+          "p95_ms": 5.029514,
+          "p99_ms": 6.120539,
+          "max_ms": 10.432241
+        },
+        "burst": null,
+        "burst_error": null,
+        "passes_4000_qps": true,
+        "steady_rounds": [
+          {
+            "requests": 12000,
+            "target_rate": 4000,
+            "throughput": 3995.1414884601763,
+            "success": 1,
+            "p50_ms": 3.407215,
+            "p95_ms": 5.029514,
+            "p99_ms": 6.120539,
+            "max_ms": 10.432241,
+            "status_codes": {
+              "200": 12000
+            },
+            "errors": []
+          }
+        ],
+        "burst_rounds": []
+      }
+    },
+    {
+      "name": "Granian raw RSGI",
+      "slug": "granian_rsgi",
+      "delay_ms": 2,
+      "result": {
+        "status": "ok",
+        "steady": {
+          "throughput": 3995.5306087839194,
+          "success": 1,
+          "p50_ms": 3.434204,
+          "p95_ms": 5.222371,
+          "p99_ms": 6.712205,
+          "max_ms": 11.441698
+        },
+        "burst": null,
+        "burst_error": null,
+        "passes_4000_qps": true,
+        "steady_rounds": [
+          {
+            "requests": 12000,
+            "target_rate": 4000,
+            "throughput": 3995.5306087839194,
+            "success": 1,
+            "p50_ms": 3.434204,
+            "p95_ms": 5.222371,
+            "p99_ms": 6.712205,
+            "max_ms": 11.441698,
+            "status_codes": {
+              "200": 12000
+            },
+            "errors": []
+          }
+        ],
+        "burst_rounds": []
+      }
+    },
+    {
+      "name": "Litestar + Granian",
+      "slug": "litestar",
+      "delay_ms": 2,
+      "result": {
+        "status": "ok",
+        "steady": {
+          "throughput": 3994.3803528826334,
+          "success": 1,
+          "p50_ms": 4.273577,
+          "p95_ms": 6.437767,
+          "p99_ms": 7.643644,
+          "max_ms": 11.628116
+        },
+        "burst": null,
+        "burst_error": null,
+        "passes_4000_qps": true,
+        "steady_rounds": [
+          {
+            "requests": 12000,
+            "target_rate": 4000,
+            "throughput": 3994.3803528826334,
+            "success": 1,
+            "p50_ms": 4.273577,
+            "p95_ms": 6.437767,
+            "p99_ms": 7.643644,
+            "max_ms": 11.628116,
+            "status_codes": {
+              "200": 12000
+            },
+            "errors": []
+          }
+        ],
+        "burst_rounds": []
+      }
+    },
+    {
+      "name": "FastAPI + Granian",
+      "slug": "fastapi",
+      "delay_ms": 2,
+      "result": {
+        "status": "ok",
+        "steady": {
+          "throughput": 3988.732771008863,
+          "success": 1,
+          "p50_ms": 12.174689,
+          "p95_ms": 23.973161,
+          "p99_ms": 31.215693,
+          "max_ms": 44.860593
+        },
+        "burst": null,
+        "burst_error": null,
+        "passes_4000_qps": true,
+        "steady_rounds": [
+          {
+            "requests": 11999,
+            "target_rate": 4000,
+            "throughput": 3988.732771008863,
+            "success": 1,
+            "p50_ms": 12.174689,
+            "p95_ms": 23.973161,
+            "p99_ms": 31.215693,
+            "max_ms": 44.860593,
+            "status_codes": {
+              "200": 11999
+            },
+            "errors": []
+          }
+        ],
+        "burst_rounds": []
+      }
+    },
+    {
+      "name": "Flask + Gunicorn gthread",
+      "slug": "flask",
+      "delay_ms": 5,
+      "result": {
+        "status": "ok",
+        "steady": {
+          "throughput": 1824.9567219839746,
+          "success": 1,
+          "p50_ms": 918.953328,
+          "p95_ms": 1388.794993,
+          "p99_ms": 2938.28655,
+          "max_ms": 3590.984632
+        },
+        "burst": null,
+        "burst_error": null,
+        "passes_4000_qps": false,
+        "steady_rounds": [
+          {
+            "requests": 12000,
+            "target_rate": 4000,
+            "throughput": 1824.9567219839746,
+            "success": 1,
+            "p50_ms": 918.953328,
+            "p95_ms": 1388.794993,
+            "p99_ms": 2938.28655,
+            "max_ms": 3590.984632,
+            "status_codes": {
+              "200": 12000
+            },
+            "errors": []
+          }
+        ],
+        "burst_rounds": []
+      }
+    },
+    {
+      "name": "Quart + Granian",
+      "slug": "quart",
+      "delay_ms": 5,
+      "result": {
+        "status": "failed",
+        "error": "TimeoutExpired(['vegeta', 'attack', '-rate=4000/s', '-duration=3s', '-workers=64', '-max-workers=8192', '-targets=/home/runner/work/web_benchmark/web_benchmark/results/targets_steady.txt'], 20)"
+      }
+    },
+    {
+      "name": "Sanic",
+      "slug": "sanic",
+      "delay_ms": 5,
+      "result": {
+        "status": "ok",
+        "steady": {
+          "throughput": 3992.3241460037134,
+          "success": 1,
+          "p50_ms": 6.218404,
+          "p95_ms": 8.12893,
+          "p99_ms": 30.496771,
+          "max_ms": 61.131448
+        },
+        "burst": null,
+        "burst_error": null,
+        "passes_4000_qps": true,
+        "steady_rounds": [
+          {
+            "requests": 12000,
+            "target_rate": 4000,
+            "throughput": 3992.3241460037134,
+            "success": 1,
+            "p50_ms": 6.218404,
+            "p95_ms": 8.12893,
+            "p99_ms": 30.496771,
+            "max_ms": 61.131448,
+            "status_codes": {
+              "200": 12000
+            },
+            "errors": []
+          }
+        ],
+        "burst_rounds": []
+      }
+    },
+    {
+      "name": "BustAPI",
+      "slug": "bustapi",
+      "delay_ms": 5,
+      "result": {
+        "status": "failed",
+        "error": "TimeoutError('timed out')"
+      }
+    },
+    {
+      "name": "Jero + Granian",
+      "slug": "jero",
+      "delay_ms": 5,
+      "result": {
+        "status": "ok",
+        "steady": {
+          "throughput": 3991.075384715995,
+          "success": 1,
+          "p50_ms": 6.501708,
+          "p95_ms": 8.190153,
+          "p99_ms": 9.349655,
+          "max_ms": 11.75159
+        },
+        "burst": null,
+        "burst_error": null,
+        "passes_4000_qps": true,
+        "steady_rounds": [
+          {
+            "requests": 12000,
+            "target_rate": 4000,
+            "throughput": 3991.075384715995,
+            "success": 1,
+            "p50_ms": 6.501708,
+            "p95_ms": 8.190153,
+            "p99_ms": 9.349655,
+            "max_ms": 11.75159,
+            "status_codes": {
+              "200": 12000
+            },
+            "errors": []
+          }
+        ],
+        "burst_rounds": []
+      }
+    },
+    {
+      "name": "Granian raw RSGI",
+      "slug": "granian_rsgi",
+      "delay_ms": 5,
+      "result": {
+        "status": "ok",
+        "steady": {
+          "throughput": 3992.7040668719305,
+          "success": 1,
+          "p50_ms": 6.647325,
+          "p95_ms": 9.352381,
+          "p99_ms": 12.100694,
+          "max_ms": 18.379649
+        },
+        "burst": null,
+        "burst_error": null,
+        "passes_4000_qps": true,
+        "steady_rounds": [
+          {
+            "requests": 11999,
+            "target_rate": 4000,
+            "throughput": 3992.7040668719305,
+            "success": 1,
+            "p50_ms": 6.647325,
+            "p95_ms": 9.352381,
+            "p99_ms": 12.100694,
+            "max_ms": 18.379649,
+            "status_codes": {
+              "200": 11999
+            },
+            "errors": []
+          }
+        ],
+        "burst_rounds": []
+      }
+    },
+    {
+      "name": "Litestar + Granian",
+      "slug": "litestar",
+      "delay_ms": 5,
+      "result": {
+        "status": "ok",
+        "steady": {
+          "throughput": 3991.858634918334,
+          "success": 1,
+          "p50_ms": 7.683772,
+          "p95_ms": 10.525975,
+          "p99_ms": 12.221306,
+          "max_ms": 15.539179
+        },
+        "burst": null,
+        "burst_error": null,
+        "passes_4000_qps": true,
+        "steady_rounds": [
+          {
+            "requests": 12000,
+            "target_rate": 4000,
+            "throughput": 3991.858634918334,
+            "success": 1,
+            "p50_ms": 7.683772,
+            "p95_ms": 10.525975,
+            "p99_ms": 12.221306,
+            "max_ms": 15.539179,
+            "status_codes": {
+              "200": 12000
+            },
+            "errors": []
+          }
+        ],
+        "burst_rounds": []
+      }
+    },
+    {
+      "name": "FastAPI + Granian",
+      "slug": "fastapi",
+      "delay_ms": 5,
+      "result": {
+        "status": "ok",
+        "steady": {
+          "throughput": 3978.5119917501947,
+          "success": 1,
+          "p50_ms": 20.698133,
+          "p95_ms": 41.714981,
+          "p99_ms": 59.389422,
+          "max_ms": 95.489597
+        },
+        "burst": null,
+        "burst_error": null,
+        "passes_4000_qps": true,
+        "steady_rounds": [
+          {
+            "requests": 12000,
+            "target_rate": 4000,
+            "throughput": 3978.5119917501947,
+            "success": 1,
+            "p50_ms": 20.698133,
+            "p95_ms": 41.714981,
+            "p99_ms": 59.389422,
+            "max_ms": 95.489597,
+            "status_codes": {
+              "200": 12000
+            },
+            "errors": []
+          }
+        ],
+        "burst_rounds": []
+      }
+    }
+  ]
+}
