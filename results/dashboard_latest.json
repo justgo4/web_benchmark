@@ -5,9 +5,15 @@
     "aggregate_qps": 4000,
     "rows_per_response": 10,
     "workers": 4,
-    "steady_seconds": 3,
-    "burst": "4000 total requests scheduled inside 200ms",
-    "starrocks_query_cache": "modeled as repeated per-endpoint query with low upstream latency",
+    "base_rate": 4000,
+    "base_seconds": 8,
+    "base_rounds": 2,
+    "headroom_rates": [
+      6000,
+      8000
+    ],
+    "headroom_seconds": 4,
+    "starrocks_query_cache": "modeled as repeated endpoint SQL with 2/5/10ms upstream latency",
     "local_api_cache": false,
     "singleflight": false
   },
@@ -18,34 +24,102 @@
       "delay_ms": 2,
       "result": {
         "status": "ok",
-        "steady": {
-          "throughput": 2830.8143332775003,
+        "base": {
+          "throughput": 1885.71806250104,
           "success": 1,
-          "p50_ms": 708.8224,
-          "p95_ms": 1215.096089,
-          "p99_ms": 1263.235766,
-          "max_ms": 1334.419154
+          "p50_ms": 1682.567982,
+          "p95_ms": 5887.488553499999,
+          "p99_ms": 6979.591216999999,
+          "max_ms": 8036.035136
         },
-        "burst": null,
-        "burst_error": null,
         "passes_4000_qps": false,
-        "steady_rounds": [
+        "base_rounds": [
           {
-            "requests": 12000,
+            "requests": 27381,
             "target_rate": 4000,
-            "throughput": 2830.8143332775003,
+            "throughput": 2187.0192649142764,
             "success": 1,
-            "p50_ms": 708.8224,
-            "p95_ms": 1215.096089,
-            "p99_ms": 1263.235766,
-            "max_ms": 1334.419154,
+            "p50_ms": 1468.851641,
+            "p95_ms": 7155.854227,
+            "p99_ms": 7992.106207,
+            "max_ms": 8036.035136,
             "status_codes": {
-              "200": 12000
+              "200": 27381
+            },
+            "errors": []
+          },
+          {
+            "requests": 19681,
+            "target_rate": 4000,
+            "throughput": 1584.4168600878038,
+            "success": 1,
+            "p50_ms": 1896.284323,
+            "p95_ms": 4619.12288,
+            "p99_ms": 5967.076227,
+            "max_ms": 6085.487722,
+            "status_codes": {
+              "200": 19681
             },
             "errors": []
           }
         ],
-        "burst_rounds": []
+        "headroom": {
+          "6000": {
+            "requests": 10691,
+            "target_rate": 6000,
+            "throughput": 305.27306363905996,
+            "success": 0.9916752408567955,
+            "p50_ms": 920.621194,
+            "p95_ms": 15624.509933,
+            "p99_ms": 29963.698141,
+            "max_ms": 30003.159679,
+            "status_codes": {
+              "0": 88,
+              "200": 10602,
+              "500": 1
+            },
+            "errors": [
+              "500 INTERNAL SERVER ERROR",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "context deadline exceeded (Client.Timeout or context cancellation while reading body)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          },
+          "8000": {
+            "requests": 10474,
+            "target_rate": 8000,
+            "throughput": 354.65834341418633,
+            "success": 1,
+            "p50_ms": 756.547729,
+            "p95_ms": 15669.881767,
+            "p99_ms": 25671.655985,
+            "max_ms": 26288.197148,
+            "status_codes": {
+              "200": 10474
+            },
+            "errors": [],
+            "pass": false
+          }
+        }
       }
     },
     {
@@ -53,8 +127,166 @@
       "slug": "quart",
       "delay_ms": 2,
       "result": {
-        "status": "failed",
-        "error": "TimeoutExpired(['vegeta', 'attack', '-rate=4000/s', '-duration=3s', '-workers=64', '-max-workers=8192', '-targets=/home/runner/work/web_benchmark/web_benchmark/results/targets_steady.txt'], 20)"
+        "status": "ok",
+        "base": {
+          "throughput": 749.410361596871,
+          "success": 0.8702326317455293,
+          "p50_ms": 311.312458,
+          "p95_ms": 30000.6922405,
+          "p99_ms": 30001.0461575,
+          "max_ms": 30022.715859
+        },
+        "passes_4000_qps": false,
+        "base_rounds": [
+          {
+            "requests": 31999,
+            "target_rate": 4000,
+            "throughput": 752.1758892913617,
+            "success": 0.871870995968624,
+            "p50_ms": 309.693546,
+            "p95_ms": 30000.70323,
+            "p99_ms": 30001.04608,
+            "max_ms": 30022.715859,
+            "status_codes": {
+              "0": 4100,
+              "200": 27899
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ]
+          },
+          {
+            "requests": 31595,
+            "target_rate": 4000,
+            "throughput": 746.6448339023802,
+            "success": 0.8702326317455293,
+            "p50_ms": 312.93137,
+            "p95_ms": 30000.681251,
+            "p99_ms": 30001.046235,
+            "max_ms": 30006.398599,
+            "status_codes": {
+              "0": 4100,
+              "200": 27495
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ]
+          }
+        ],
+        "headroom": {
+          "6000": {
+            "requests": 13632,
+            "target_rate": 6000,
+            "throughput": 289.9482786935734,
+            "success": 0.6992370892018779,
+            "p50_ms": 711.022931,
+            "p95_ms": 30000.952118,
+            "p99_ms": 30001.129658,
+            "max_ms": 30006.985984,
+            "status_codes": {
+              "0": 4100,
+              "200": 9532
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          },
+          "8000": {
+            "requests": 13890,
+            "target_rate": 8000,
+            "throughput": 312.60311026197763,
+            "success": 0.7048236141108711,
+            "p50_ms": 623.850437,
+            "p95_ms": 30000.966175,
+            "p99_ms": 30001.237497,
+            "max_ms": 30022.099575,
+            "status_codes": {
+              "0": 4100,
+              "200": 9790
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
       }
     },
     {
@@ -63,34 +295,77 @@
       "delay_ms": 2,
       "result": {
         "status": "ok",
-        "steady": {
-          "throughput": 3996.1381499428003,
+        "base": {
+          "throughput": 3998.900640453356,
           "success": 1,
-          "p50_ms": 3.148772,
-          "p95_ms": 4.807205,
-          "p99_ms": 13.573113,
-          "max_ms": 33.780374
+          "p50_ms": 3.1173634999999997,
+          "p95_ms": 4.606877,
+          "p99_ms": 5.4180945,
+          "max_ms": 9.129842
         },
-        "burst": null,
-        "burst_error": null,
         "passes_4000_qps": true,
-        "steady_rounds": [
+        "base_rounds": [
           {
-            "requests": 11999,
+            "requests": 32000,
             "target_rate": 4000,
-            "throughput": 3996.1381499428003,
+            "throughput": 3999.108858077722,
             "success": 1,
-            "p50_ms": 3.148772,
-            "p95_ms": 4.807205,
-            "p99_ms": 13.573113,
-            "max_ms": 33.780374,
+            "p50_ms": 3.10764,
+            "p95_ms": 4.503673,
+            "p99_ms": 5.264186,
+            "max_ms": 9.129842,
             "status_codes": {
-              "200": 11999
+              "200": 32000
+            },
+            "errors": []
+          },
+          {
+            "requests": 31998,
+            "target_rate": 4000,
+            "throughput": 3998.6924228289904,
+            "success": 1,
+            "p50_ms": 3.127087,
+            "p95_ms": 4.710081,
+            "p99_ms": 5.572003,
+            "max_ms": 8.389398,
+            "status_codes": {
+              "200": 31998
             },
             "errors": []
           }
         ],
-        "burst_rounds": []
+        "headroom": {
+          "6000": {
+            "requests": 23990,
+            "target_rate": 6000,
+            "throughput": 5992.559346056893,
+            "success": 1,
+            "p50_ms": 5.408891,
+            "p95_ms": 10.412587,
+            "p99_ms": 18.655652,
+            "max_ms": 33.181926,
+            "status_codes": {
+              "200": 23990
+            },
+            "errors": [],
+            "pass": true
+          },
+          "8000": {
+            "requests": 23012,
+            "target_rate": 8000,
+            "throughput": 1490.2770297160296,
+            "success": 1,
+            "p50_ms": 750.19035,
+            "p95_ms": 1942.650299,
+            "p99_ms": 6774.791221,
+            "max_ms": 13815.27703,
+            "status_codes": {
+              "200": 23012
+            },
+            "errors": [],
+            "pass": false
+          }
+        }
       }
     },
     {
@@ -99,7 +374,7 @@
       "delay_ms": 2,
       "result": {
         "status": "failed",
-        "error": "TimeoutError('timed out')"
+        "error": "startup/readiness: TimeoutError('timed out')"
       }
     },
     {
@@ -108,34 +383,99 @@
       "delay_ms": 2,
       "result": {
         "status": "ok",
-        "steady": {
-          "throughput": 3995.1414884601763,
+        "base": {
+          "throughput": 3998.6794488768196,
           "success": 1,
-          "p50_ms": 3.407215,
-          "p95_ms": 5.029514,
-          "p99_ms": 6.120539,
-          "max_ms": 10.432241
+          "p50_ms": 3.4778130000000003,
+          "p95_ms": 5.110816,
+          "p99_ms": 6.23571,
+          "max_ms": 11.753273
         },
-        "burst": null,
-        "burst_error": null,
         "passes_4000_qps": true,
-        "steady_rounds": [
+        "base_rounds": [
           {
-            "requests": 12000,
+            "requests": 32000,
             "target_rate": 4000,
-            "throughput": 3995.1414884601763,
+            "throughput": 3998.7573596587185,
             "success": 1,
-            "p50_ms": 3.407215,
-            "p95_ms": 5.029514,
-            "p99_ms": 6.120539,
-            "max_ms": 10.432241,
+            "p50_ms": 3.448598,
+            "p95_ms": 5.014019,
+            "p99_ms": 6.109892,
+            "max_ms": 9.214129,
             "status_codes": {
-              "200": 12000
+              "200": 32000
+            },
+            "errors": []
+          },
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 3998.6015380949207,
+            "success": 1,
+            "p50_ms": 3.507028,
+            "p95_ms": 5.207613,
+            "p99_ms": 6.361528,
+            "max_ms": 11.753273,
+            "status_codes": {
+              "200": 32000
             },
             "errors": []
           }
         ],
-        "burst_rounds": []
+        "headroom": {
+          "6000": {
+            "requests": 23998,
+            "target_rate": 6000,
+            "throughput": 5992.1569532067915,
+            "success": 1,
+            "p50_ms": 7.885839,
+            "p95_ms": 13.723354,
+            "p99_ms": 17.020875,
+            "max_ms": 24.985669,
+            "status_codes": {
+              "200": 23998
+            },
+            "errors": [],
+            "pass": true
+          },
+          "8000": {
+            "requests": 31926,
+            "target_rate": 8000,
+            "throughput": 830.5965925085349,
+            "success": 0.8715780241809183,
+            "p50_ms": 144.916035,
+            "p95_ms": 30000.694147,
+            "p99_ms": 30001.096186,
+            "max_ms": 30018.285916,
+            "status_codes": {
+              "0": 4100,
+              "200": 27826
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
       }
     },
     {
@@ -144,34 +484,99 @@
       "delay_ms": 2,
       "result": {
         "status": "ok",
-        "steady": {
-          "throughput": 3995.5306087839194,
+        "base": {
+          "throughput": 3998.628336287521,
           "success": 1,
-          "p50_ms": 3.434204,
-          "p95_ms": 5.222371,
-          "p99_ms": 6.712205,
-          "max_ms": 11.441698
+          "p50_ms": 3.543356,
+          "p95_ms": 5.377786499999999,
+          "p99_ms": 6.833885,
+          "max_ms": 18.728305
         },
-        "burst": null,
-        "burst_error": null,
         "passes_4000_qps": true,
-        "steady_rounds": [
+        "base_rounds": [
           {
-            "requests": 12000,
+            "requests": 31999,
             "target_rate": 4000,
-            "throughput": 3995.5306087839194,
+            "throughput": 3998.544410374376,
             "success": 1,
-            "p50_ms": 3.434204,
-            "p95_ms": 5.222371,
-            "p99_ms": 6.712205,
-            "max_ms": 11.441698,
+            "p50_ms": 3.613983,
+            "p95_ms": 5.551803,
+            "p99_ms": 7.060251,
+            "max_ms": 18.728305,
             "status_codes": {
-              "200": 12000
+              "200": 31999
+            },
+            "errors": []
+          },
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 3998.7122622006664,
+            "success": 1,
+            "p50_ms": 3.472729,
+            "p95_ms": 5.20377,
+            "p99_ms": 6.607519,
+            "max_ms": 13.084397,
+            "status_codes": {
+              "200": 32000
             },
             "errors": []
           }
         ],
-        "burst_rounds": []
+        "headroom": {
+          "6000": {
+            "requests": 24000,
+            "target_rate": 6000,
+            "throughput": 5992.482706099403,
+            "success": 1,
+            "p50_ms": 8.141969,
+            "p95_ms": 13.866316,
+            "p99_ms": 17.22006,
+            "max_ms": 27.533902,
+            "status_codes": {
+              "200": 24000
+            },
+            "errors": [],
+            "pass": true
+          },
+          "8000": {
+            "requests": 31922,
+            "target_rate": 8000,
+            "throughput": 827.4509265678014,
+            "success": 0.8715619322097613,
+            "p50_ms": 140.109063,
+            "p95_ms": 30000.692096,
+            "p99_ms": 30001.064281,
+            "max_ms": 30020.288448,
+            "status_codes": {
+              "0": 4100,
+              "200": 27822
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
       }
     },
     {
@@ -180,34 +585,99 @@
       "delay_ms": 2,
       "result": {
         "status": "ok",
-        "steady": {
-          "throughput": 3994.3803528826334,
+        "base": {
+          "throughput": 3998.1506472962383,
           "success": 1,
-          "p50_ms": 4.273577,
-          "p95_ms": 6.437767,
-          "p99_ms": 7.643644,
-          "max_ms": 11.628116
+          "p50_ms": 4.3031385,
+          "p95_ms": 6.6375795,
+          "p99_ms": 8.135418000000001,
+          "max_ms": 14.834627
         },
-        "burst": null,
-        "burst_error": null,
         "passes_4000_qps": true,
-        "steady_rounds": [
+        "base_rounds": [
           {
-            "requests": 12000,
+            "requests": 31999,
             "target_rate": 4000,
-            "throughput": 3994.3803528826334,
+            "throughput": 3997.5848830604186,
             "success": 1,
-            "p50_ms": 4.273577,
-            "p95_ms": 6.437767,
-            "p99_ms": 7.643644,
-            "max_ms": 11.628116,
+            "p50_ms": 4.290942,
+            "p95_ms": 6.638091,
+            "p99_ms": 8.269054,
+            "max_ms": 14.834627,
             "status_codes": {
-              "200": 12000
+              "200": 31999
+            },
+            "errors": []
+          },
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 3998.7164115320584,
+            "success": 1,
+            "p50_ms": 4.315335,
+            "p95_ms": 6.637068,
+            "p99_ms": 8.001782,
+            "max_ms": 12.315373,
+            "status_codes": {
+              "200": 32000
             },
             "errors": []
           }
         ],
-        "burst_rounds": []
+        "headroom": {
+          "6000": {
+            "requests": 24000,
+            "target_rate": 6000,
+            "throughput": 5904.802165390155,
+            "success": 1,
+            "p50_ms": 56.773774,
+            "p95_ms": 109.035019,
+            "p99_ms": 130.511678,
+            "max_ms": 154.547711,
+            "status_codes": {
+              "200": 24000
+            },
+            "errors": [],
+            "pass": true
+          },
+          "8000": {
+            "requests": 21485,
+            "target_rate": 8000,
+            "throughput": 548.0402879313149,
+            "success": 0.8091691878054457,
+            "p50_ms": 315.034929,
+            "p95_ms": 30000.890824,
+            "p99_ms": 30001.17313,
+            "max_ms": 30046.774895,
+            "status_codes": {
+              "0": 4100,
+              "200": 17385
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
       }
     },
     {
@@ -216,34 +686,121 @@
       "delay_ms": 2,
       "result": {
         "status": "ok",
-        "steady": {
-          "throughput": 3988.732771008863,
+        "base": {
+          "throughput": 3993.443642270653,
           "success": 1,
-          "p50_ms": 12.174689,
-          "p95_ms": 23.973161,
-          "p99_ms": 31.215693,
-          "max_ms": 44.860593
+          "p50_ms": 14.6808555,
+          "p95_ms": 28.006404500000002,
+          "p99_ms": 38.943306,
+          "max_ms": 104.736408
         },
-        "burst": null,
-        "burst_error": null,
         "passes_4000_qps": true,
-        "steady_rounds": [
+        "base_rounds": [
           {
-            "requests": 11999,
+            "requests": 32000,
             "target_rate": 4000,
-            "throughput": 3988.732771008863,
+            "throughput": 3992.837121218354,
             "success": 1,
-            "p50_ms": 12.174689,
-            "p95_ms": 23.973161,
-            "p99_ms": 31.215693,
-            "max_ms": 44.860593,
+            "p50_ms": 15.418921,
+            "p95_ms": 31.869287,
+            "p99_ms": 47.856297,
+            "max_ms": 104.736408,
             "status_codes": {
-              "200": 11999
+              "200": 32000
+            },
+            "errors": []
+          },
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 3994.050163322952,
+            "success": 1,
+            "p50_ms": 13.94279,
+            "p95_ms": 24.143522,
+            "p99_ms": 30.030315,
+            "max_ms": 51.811932,
+            "status_codes": {
+              "200": 32000
             },
             "errors": []
           }
         ],
-        "burst_rounds": []
+        "headroom": {
+          "6000": {
+            "requests": 16267,
+            "target_rate": 6000,
+            "throughput": 381.11013955760535,
+            "success": 0.7479559845085142,
+            "p50_ms": 390.006512,
+            "p95_ms": 30000.909378,
+            "p99_ms": 30001.106122,
+            "max_ms": 30007.02164,
+            "status_codes": {
+              "0": 4100,
+              "200": 12167
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          },
+          "8000": {
+            "requests": 13997,
+            "target_rate": 8000,
+            "throughput": 293.8294113457191,
+            "success": 0.7070800885904123,
+            "p50_ms": 540.600841,
+            "p95_ms": 30000.953808,
+            "p99_ms": 30001.139591,
+            "max_ms": 30087.731068,
+            "status_codes": {
+              "0": 4100,
+              "200": 9897
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
       }
     },
     {
@@ -252,34 +809,99 @@
       "delay_ms": 5,
       "result": {
         "status": "ok",
-        "steady": {
-          "throughput": 1824.9567219839746,
-          "success": 1,
-          "p50_ms": 918.953328,
-          "p95_ms": 1388.794993,
-          "p99_ms": 2938.28655,
-          "max_ms": 3590.984632
+        "base": {
+          "throughput": 1341.2775247038314,
+          "success": 0.9939113635033078,
+          "p50_ms": 2227.7837675,
+          "p95_ms": 8299.2321805,
+          "p99_ms": 10369.5199105,
+          "max_ms": 30003.785226
         },
-        "burst": null,
-        "burst_error": null,
         "passes_4000_qps": false,
-        "steady_rounds": [
+        "base_rounds": [
           {
-            "requests": 12000,
+            "requests": 23708,
             "target_rate": 4000,
-            "throughput": 1824.9567219839746,
+            "throughput": 2208.9989733180646,
             "success": 1,
-            "p50_ms": 918.953328,
-            "p95_ms": 1388.794993,
-            "p99_ms": 2938.28655,
-            "max_ms": 3590.984632,
+            "p50_ms": 1642.386629,
+            "p95_ms": 6288.524672,
+            "p99_ms": 6402.66214,
+            "max_ms": 6430.076313,
             "status_codes": {
-              "200": 12000
+              "200": 23708
             },
             "errors": []
+          },
+          {
+            "requests": 17081,
+            "target_rate": 4000,
+            "throughput": 473.55607608959815,
+            "success": 0.9939113635033078,
+            "p50_ms": 2813.180906,
+            "p95_ms": 10309.939689,
+            "p99_ms": 14336.377681,
+            "max_ms": 30003.785226,
+            "status_codes": {
+              "0": 104,
+              "200": 16977
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ]
           }
         ],
-        "burst_rounds": []
+        "headroom": {
+          "6000": {
+            "requests": 16110,
+            "target_rate": 6000,
+            "throughput": 1497.8660322431626,
+            "success": 1,
+            "p50_ms": 1597.832502,
+            "p95_ms": 8663.287478,
+            "p99_ms": 8767.973703,
+            "max_ms": 8826.480139,
+            "status_codes": {
+              "200": 16110
+            },
+            "errors": [],
+            "pass": false
+          },
+          "8000": {
+            "requests": 13793,
+            "target_rate": 8000,
+            "throughput": 1427.3274864490795,
+            "success": 1,
+            "p50_ms": 2230.754985,
+            "p95_ms": 7572.03948,
+            "p99_ms": 7714.068932,
+            "max_ms": 7771.612052,
+            "status_codes": {
+              "200": 13793
+            },
+            "errors": [],
+            "pass": false
+          }
+        }
       }
     },
     {
@@ -287,8 +909,166 @@
       "slug": "quart",
       "delay_ms": 5,
       "result": {
-        "status": "failed",
-        "error": "TimeoutExpired(['vegeta', 'attack', '-rate=4000/s', '-duration=3s', '-workers=64', '-max-workers=8192', '-targets=/home/runner/work/web_benchmark/web_benchmark/results/targets_steady.txt'], 20)"
+        "status": "ok",
+        "base": {
+          "throughput": 626.9596105764915,
+          "success": 0.8223262263823886,
+          "p50_ms": 416.43880950000005,
+          "p95_ms": 30000.763335,
+          "p99_ms": 30001.078985,
+          "max_ms": 30585.457733
+        },
+        "passes_4000_qps": false,
+        "base_rounds": [
+          {
+            "requests": 30781,
+            "target_rate": 4000,
+            "throughput": 723.3871918723468,
+            "success": 0.8668009486371463,
+            "p50_ms": 314.818776,
+            "p95_ms": 30000.690357,
+            "p99_ms": 30001.054825,
+            "max_ms": 30047.070572,
+            "status_codes": {
+              "0": 4100,
+              "200": 26681
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ]
+          },
+          {
+            "requests": 23076,
+            "target_rate": 4000,
+            "throughput": 530.5320292806363,
+            "success": 0.8223262263823886,
+            "p50_ms": 518.058843,
+            "p95_ms": 30000.836313,
+            "p99_ms": 30001.103145,
+            "max_ms": 30585.457733,
+            "status_codes": {
+              "0": 4100,
+              "200": 18976
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ]
+          }
+        ],
+        "headroom": {
+          "6000": {
+            "requests": 13554,
+            "target_rate": 6000,
+            "throughput": 299.65518722297793,
+            "success": 0.6975062712114505,
+            "p50_ms": 619.337193,
+            "p95_ms": 30000.97228,
+            "p99_ms": 30001.175303,
+            "max_ms": 30021.400872,
+            "status_codes": {
+              "0": 4100,
+              "200": 9454
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          },
+          "8000": {
+            "requests": 13081,
+            "target_rate": 8000,
+            "throughput": 288.0956441282274,
+            "success": 0.6865683051754453,
+            "p50_ms": 743.978053,
+            "p95_ms": 30001.014687,
+            "p99_ms": 30002.161595,
+            "max_ms": 30029.648894,
+            "status_codes": {
+              "0": 4100,
+              "200": 8981
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
       }
     },
     {
@@ -297,34 +1077,77 @@
       "delay_ms": 5,
       "result": {
         "status": "ok",
-        "steady": {
-          "throughput": 3992.3241460037134,
+        "base": {
+          "throughput": 3997.0697605318333,
           "success": 1,
-          "p50_ms": 6.218404,
-          "p95_ms": 8.12893,
-          "p99_ms": 30.496771,
-          "max_ms": 61.131448
+          "p50_ms": 6.203641,
+          "p95_ms": 7.7806485,
+          "p99_ms": 9.861449499999999,
+          "max_ms": 33.144556
         },
-        "burst": null,
-        "burst_error": null,
         "passes_4000_qps": true,
-        "steady_rounds": [
+        "base_rounds": [
           {
-            "requests": 12000,
+            "requests": 31999,
             "target_rate": 4000,
-            "throughput": 3992.3241460037134,
+            "throughput": 3997.091209838543,
             "success": 1,
-            "p50_ms": 6.218404,
-            "p95_ms": 8.12893,
-            "p99_ms": 30.496771,
-            "max_ms": 61.131448,
+            "p50_ms": 6.230577,
+            "p95_ms": 7.9213,
+            "p99_ms": 11.057403,
+            "max_ms": 33.144556,
             "status_codes": {
-              "200": 12000
+              "200": 31999
+            },
+            "errors": []
+          },
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 3997.0483112251236,
+            "success": 1,
+            "p50_ms": 6.176705,
+            "p95_ms": 7.639997,
+            "p99_ms": 8.665496,
+            "max_ms": 12.761549,
+            "status_codes": {
+              "200": 32000
             },
             "errors": []
           }
         ],
-        "burst_rounds": []
+        "headroom": {
+          "6000": {
+            "requests": 24001,
+            "target_rate": 6000,
+            "throughput": 5987.73274499112,
+            "success": 1,
+            "p50_ms": 8.667983,
+            "p95_ms": 13.017384,
+            "p99_ms": 16.931601,
+            "max_ms": 35.570525,
+            "status_codes": {
+              "200": 24001
+            },
+            "errors": [],
+            "pass": true
+          },
+          "8000": {
+            "requests": 20160,
+            "target_rate": 8000,
+            "throughput": 2397.034049323631,
+            "success": 1,
+            "p50_ms": 568.726666,
+            "p95_ms": 1317.001185,
+            "p99_ms": 3420.907673,
+            "max_ms": 6761.383549,
+            "status_codes": {
+              "200": 20160
+            },
+            "errors": [],
+            "pass": false
+          }
+        }
       }
     },
     {
@@ -333,7 +1156,7 @@
       "delay_ms": 5,
       "result": {
         "status": "failed",
-        "error": "TimeoutError('timed out')"
+        "error": "startup/readiness: TimeoutError('timed out')"
       }
     },
     {
@@ -342,34 +1165,99 @@
       "delay_ms": 5,
       "result": {
         "status": "ok",
-        "steady": {
-          "throughput": 3991.075384715995,
+        "base": {
+          "throughput": 3997.309282502526,
           "success": 1,
-          "p50_ms": 6.501708,
-          "p95_ms": 8.190153,
-          "p99_ms": 9.349655,
-          "max_ms": 11.75159
+          "p50_ms": 6.491356,
+          "p95_ms": 8.334150999999999,
+          "p99_ms": 9.972274500000001,
+          "max_ms": 21.225037
         },
-        "burst": null,
-        "burst_error": null,
         "passes_4000_qps": true,
-        "steady_rounds": [
+        "base_rounds": [
           {
-            "requests": 12000,
+            "requests": 32000,
             "target_rate": 4000,
-            "throughput": 3991.075384715995,
+            "throughput": 3997.1843473710533,
             "success": 1,
-            "p50_ms": 6.501708,
-            "p95_ms": 8.190153,
-            "p99_ms": 9.349655,
-            "max_ms": 11.75159,
+            "p50_ms": 6.494445,
+            "p95_ms": 8.300028,
+            "p99_ms": 9.630601,
+            "max_ms": 14.305351,
             "status_codes": {
-              "200": 12000
+              "200": 32000
+            },
+            "errors": []
+          },
+          {
+            "requests": 31999,
+            "target_rate": 4000,
+            "throughput": 3997.434217633999,
+            "success": 1,
+            "p50_ms": 6.488267,
+            "p95_ms": 8.368274,
+            "p99_ms": 10.313948,
+            "max_ms": 21.225037,
+            "status_codes": {
+              "200": 31999
             },
             "errors": []
           }
         ],
-        "burst_rounds": []
+        "headroom": {
+          "6000": {
+            "requests": 23995,
+            "target_rate": 6000,
+            "throughput": 5984.045063478934,
+            "success": 1,
+            "p50_ms": 11.180507,
+            "p95_ms": 17.140064,
+            "p99_ms": 20.843267,
+            "max_ms": 39.421834,
+            "status_codes": {
+              "200": 23995
+            },
+            "errors": [],
+            "pass": true
+          },
+          "8000": {
+            "requests": 31494,
+            "target_rate": 8000,
+            "throughput": 824.1603403690674,
+            "success": 0.8698164729789801,
+            "p50_ms": 162.177099,
+            "p95_ms": 30000.676747,
+            "p99_ms": 30001.065889,
+            "max_ms": 30024.976808,
+            "status_codes": {
+              "0": 4100,
+              "200": 27394
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
       }
     },
     {
@@ -378,34 +1266,99 @@
       "delay_ms": 5,
       "result": {
         "status": "ok",
-        "steady": {
-          "throughput": 3992.7040668719305,
+        "base": {
+          "throughput": 3997.1760604209185,
           "success": 1,
-          "p50_ms": 6.647325,
-          "p95_ms": 9.352381,
-          "p99_ms": 12.100694,
-          "max_ms": 18.379649
+          "p50_ms": 6.5329014999999995,
+          "p95_ms": 8.508289999999999,
+          "p99_ms": 10.2555905,
+          "max_ms": 21.87026
         },
-        "burst": null,
-        "burst_error": null,
         "passes_4000_qps": true,
-        "steady_rounds": [
+        "base_rounds": [
           {
-            "requests": 11999,
+            "requests": 31999,
             "target_rate": 4000,
-            "throughput": 3992.7040668719305,
+            "throughput": 3997.141207733449,
             "success": 1,
-            "p50_ms": 6.647325,
-            "p95_ms": 9.352381,
-            "p99_ms": 12.100694,
-            "max_ms": 18.379649,
+            "p50_ms": 6.553211,
+            "p95_ms": 8.75113,
+            "p99_ms": 10.98905,
+            "max_ms": 21.87026,
             "status_codes": {
-              "200": 11999
+              "200": 31999
+            },
+            "errors": []
+          },
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 3997.2109131083885,
+            "success": 1,
+            "p50_ms": 6.512592,
+            "p95_ms": 8.26545,
+            "p99_ms": 9.522131,
+            "max_ms": 17.147842,
+            "status_codes": {
+              "200": 32000
             },
             "errors": []
           }
         ],
-        "burst_rounds": []
+        "headroom": {
+          "6000": {
+            "requests": 24001,
+            "target_rate": 6000,
+            "throughput": 5986.8701295404635,
+            "success": 1,
+            "p50_ms": 12.186873,
+            "p95_ms": 20.653807,
+            "p99_ms": 35.934943,
+            "max_ms": 72.188751,
+            "status_codes": {
+              "200": 24001
+            },
+            "errors": [],
+            "pass": true
+          },
+          "8000": {
+            "requests": 31366,
+            "target_rate": 8000,
+            "throughput": 805.6025548067852,
+            "success": 0.8692852132882739,
+            "p50_ms": 146.317793,
+            "p95_ms": 30000.706742,
+            "p99_ms": 30001.062202,
+            "max_ms": 30025.850881,
+            "status_codes": {
+              "0": 4100,
+              "200": 27266
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
       }
     },
     {
@@ -414,34 +1367,99 @@
       "delay_ms": 5,
       "result": {
         "status": "ok",
-        "steady": {
-          "throughput": 3991.858634918334,
+        "base": {
+          "throughput": 3996.867542277522,
           "success": 1,
-          "p50_ms": 7.683772,
-          "p95_ms": 10.525975,
-          "p99_ms": 12.221306,
-          "max_ms": 15.539179
+          "p50_ms": 7.451223499999999,
+          "p95_ms": 10.076716000000001,
+          "p99_ms": 11.848811999999999,
+          "max_ms": 20.686609
         },
-        "burst": null,
-        "burst_error": null,
         "passes_4000_qps": true,
-        "steady_rounds": [
+        "base_rounds": [
           {
-            "requests": 12000,
+            "requests": 32000,
             "target_rate": 4000,
-            "throughput": 3991.858634918334,
+            "throughput": 3996.8562182843425,
             "success": 1,
-            "p50_ms": 7.683772,
-            "p95_ms": 10.525975,
-            "p99_ms": 12.221306,
-            "max_ms": 15.539179,
+            "p50_ms": 7.438908,
+            "p95_ms": 10.080342,
+            "p99_ms": 11.875547,
+            "max_ms": 20.686609,
             "status_codes": {
-              "200": 12000
+              "200": 32000
+            },
+            "errors": []
+          },
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 3996.878866270701,
+            "success": 1,
+            "p50_ms": 7.463539,
+            "p95_ms": 10.07309,
+            "p99_ms": 11.822077,
+            "max_ms": 19.099468,
+            "status_codes": {
+              "200": 32000
             },
             "errors": []
           }
         ],
-        "burst_rounds": []
+        "headroom": {
+          "6000": {
+            "requests": 23995,
+            "target_rate": 6000,
+            "throughput": 5944.891983554846,
+            "success": 1,
+            "p50_ms": 32.370966,
+            "p95_ms": 59.791805,
+            "p99_ms": 73.589549,
+            "max_ms": 101.276175,
+            "status_codes": {
+              "200": 23995
+            },
+            "errors": [],
+            "pass": true
+          },
+          "8000": {
+            "requests": 20241,
+            "target_rate": 8000,
+            "throughput": 512.4174554360792,
+            "success": 0.7974408379032657,
+            "p50_ms": 374.419715,
+            "p95_ms": 30000.843592,
+            "p99_ms": 30001.11464,
+            "max_ms": 30009.194817,
+            "status_codes": {
+              "0": 4100,
+              "200": 16141
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
       }
     },
     {
@@ -450,34 +1468,962 @@
       "delay_ms": 5,
       "result": {
         "status": "ok",
-        "steady": {
-          "throughput": 3978.5119917501947,
+        "base": {
+          "throughput": 3991.9657277002043,
           "success": 1,
-          "p50_ms": 20.698133,
-          "p95_ms": 41.714981,
-          "p99_ms": 59.389422,
-          "max_ms": 95.489597
+          "p50_ms": 21.0418125,
+          "p95_ms": 38.0975105,
+          "p99_ms": 48.087702,
+          "max_ms": 100.083958
         },
-        "burst": null,
-        "burst_error": null,
         "passes_4000_qps": true,
-        "steady_rounds": [
+        "base_rounds": [
           {
-            "requests": 12000,
+            "requests": 32000,
             "target_rate": 4000,
-            "throughput": 3978.5119917501947,
+            "throughput": 3989.3616296812233,
             "success": 1,
-            "p50_ms": 20.698133,
-            "p95_ms": 41.714981,
-            "p99_ms": 59.389422,
-            "max_ms": 95.489597,
+            "p50_ms": 24.11586,
+            "p95_ms": 46.963638,
+            "p99_ms": 60.683821,
+            "max_ms": 100.083958,
             "status_codes": {
-              "200": 12000
+              "200": 32000
+            },
+            "errors": []
+          },
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 3994.5698257191852,
+            "success": 1,
+            "p50_ms": 17.967765,
+            "p95_ms": 29.231383,
+            "p99_ms": 35.491583,
+            "max_ms": 51.771015,
+            "status_codes": {
+              "200": 32000
             },
             "errors": []
           }
         ],
-        "burst_rounds": []
+        "headroom": {
+          "6000": {
+            "requests": 16834,
+            "target_rate": 6000,
+            "throughput": 396.22515070482416,
+            "success": 0.7564452892954735,
+            "p50_ms": 382.487827,
+            "p95_ms": 30000.876319,
+            "p99_ms": 30001.089046,
+            "max_ms": 30015.17561,
+            "status_codes": {
+              "0": 4100,
+              "200": 12734
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          },
+          "8000": {
+            "requests": 14017,
+            "target_rate": 8000,
+            "throughput": 299.88816270173805,
+            "success": 0.707498038096597,
+            "p50_ms": 534.084754,
+            "p95_ms": 30000.933632,
+            "p99_ms": 30001.123385,
+            "max_ms": 30011.119339,
+            "status_codes": {
+              "0": 4100,
+              "200": 9917
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Flask + Gunicorn gthread",
+      "slug": "flask",
+      "delay_ms": 10,
+      "result": {
+        "status": "ok",
+        "base": {
+          "throughput": 1759.8905589416395,
+          "success": 1,
+          "p50_ms": 1674.1730475,
+          "p95_ms": 8792.500490999999,
+          "p99_ms": 9446.385082,
+          "max_ms": 10821.38805
+        },
+        "passes_4000_qps": false,
+        "base_rounds": [
+          {
+            "requests": 25213,
+            "target_rate": 4000,
+            "throughput": 1743.9995858459931,
+            "success": 1,
+            "p50_ms": 1420.382351,
+            "p95_ms": 10256.247688,
+            "p99_ms": 10744.374537,
+            "max_ms": 10821.38805,
+            "status_codes": {
+              "200": 25213
+            },
+            "errors": []
+          },
+          {
+            "requests": 21696,
+            "target_rate": 4000,
+            "throughput": 1775.781532037286,
+            "success": 1,
+            "p50_ms": 1927.963744,
+            "p95_ms": 7328.753294,
+            "p99_ms": 8148.395627,
+            "max_ms": 8412.474662,
+            "status_codes": {
+              "200": 21696
+            },
+            "errors": []
+          }
+        ],
+        "headroom": {
+          "6000": {
+            "requests": 13822,
+            "target_rate": 6000,
+            "throughput": 1367.534499987371,
+            "success": 1,
+            "p50_ms": 1799.989272,
+            "p95_ms": 8328.440545,
+            "p99_ms": 8413.179914,
+            "max_ms": 8468.620317,
+            "status_codes": {
+              "200": 13822
+            },
+            "errors": [],
+            "pass": false
+          },
+          "8000": {
+            "requests": 12561,
+            "target_rate": 8000,
+            "throughput": 377.53060209822195,
+            "success": 0.9984077700819999,
+            "p50_ms": 2385.219226,
+            "p95_ms": 6141.310674,
+            "p99_ms": 6370.726661,
+            "max_ms": 30003.116028,
+            "status_codes": {
+              "0": 20,
+              "200": 12541
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Quart + Granian",
+      "slug": "quart",
+      "delay_ms": 10,
+      "result": {
+        "status": "ok",
+        "base": {
+          "throughput": 721.9625157788525,
+          "success": 0.8636424105361181,
+          "p50_ms": 316.681323,
+          "p95_ms": 30000.7095385,
+          "p99_ms": 30001.0635255,
+          "max_ms": 30022.740161
+        },
+        "passes_4000_qps": false,
+        "base_rounds": [
+          {
+            "requests": 31035,
+            "target_rate": 4000,
+            "throughput": 730.8839690531751,
+            "success": 0.8678910907040438,
+            "p50_ms": 312.033282,
+            "p95_ms": 30000.69157,
+            "p99_ms": 30001.055313,
+            "max_ms": 30022.740161,
+            "status_codes": {
+              "0": 4100,
+              "200": 26935
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ]
+          },
+          {
+            "requests": 30068,
+            "target_rate": 4000,
+            "throughput": 713.0410625045301,
+            "success": 0.8636424105361181,
+            "p50_ms": 321.329364,
+            "p95_ms": 30000.727507,
+            "p99_ms": 30001.071738,
+            "max_ms": 30022.299669,
+            "status_codes": {
+              "0": 4100,
+              "200": 25968
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ]
+          }
+        ],
+        "headroom": {
+          "6000": {
+            "requests": 14137,
+            "target_rate": 6000,
+            "throughput": 303.1449158810062,
+            "success": 0.7099809011812973,
+            "p50_ms": 608.687615,
+            "p95_ms": 30000.928176,
+            "p99_ms": 30001.104474,
+            "max_ms": 30008.869508,
+            "status_codes": {
+              "0": 4100,
+              "200": 10037
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          },
+          "8000": {
+            "requests": 13751,
+            "target_rate": 8000,
+            "throughput": 305.06806345810236,
+            "success": 0.7018398661915497,
+            "p50_ms": 693.072798,
+            "p95_ms": 30000.992594,
+            "p99_ms": 30021.508602,
+            "max_ms": 30060.696819,
+            "status_codes": {
+              "0": 4100,
+              "200": 9651
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Sanic",
+      "slug": "sanic",
+      "delay_ms": 10,
+      "result": {
+        "status": "ok",
+        "base": {
+          "throughput": 3995.1552485524953,
+          "success": 1,
+          "p50_ms": 11.200433499999999,
+          "p95_ms": 12.6903335,
+          "p99_ms": 13.8335175,
+          "max_ms": 26.632707
+        },
+        "passes_4000_qps": true,
+        "base_rounds": [
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 3995.1438507125886,
+            "success": 1,
+            "p50_ms": 11.260532,
+            "p95_ms": 12.82162,
+            "p99_ms": 14.095938,
+            "max_ms": 26.632707,
+            "status_codes": {
+              "200": 32000
+            },
+            "errors": []
+          },
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 3995.1666463924025,
+            "success": 1,
+            "p50_ms": 11.140335,
+            "p95_ms": 12.559047,
+            "p99_ms": 13.571097,
+            "max_ms": 19.761448,
+            "status_codes": {
+              "200": 32000
+            },
+            "errors": []
+          }
+        ],
+        "headroom": {
+          "6000": {
+            "requests": 23997,
+            "target_rate": 6000,
+            "throughput": 5982.060541556262,
+            "success": 1,
+            "p50_ms": 13.575115,
+            "p95_ms": 17.530838,
+            "p99_ms": 20.259467,
+            "max_ms": 27.518719,
+            "status_codes": {
+              "200": 23997
+            },
+            "errors": [],
+            "pass": true
+          },
+          "8000": {
+            "requests": 20197,
+            "target_rate": 8000,
+            "throughput": 634.4570708243185,
+            "success": 0.994009011239293,
+            "p50_ms": 465.505156,
+            "p95_ms": 1849.326741,
+            "p99_ms": 23982.433217,
+            "max_ms": 30002.481518,
+            "status_codes": {
+              "0": 121,
+              "200": 20076
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
+      }
+    },
+    {
+      "name": "BustAPI",
+      "slug": "bustapi",
+      "delay_ms": 10,
+      "result": {
+        "status": "failed",
+        "error": "startup/readiness: TimeoutError('timed out')"
+      }
+    },
+    {
+      "name": "Jero + Granian",
+      "slug": "jero",
+      "delay_ms": 10,
+      "result": {
+        "status": "ok",
+        "base": {
+          "throughput": 3994.6093324526782,
+          "success": 1,
+          "p50_ms": 12.0115215,
+          "p95_ms": 14.567851000000001,
+          "p99_ms": 16.541680500000002,
+          "max_ms": 27.877506
+        },
+        "passes_4000_qps": true,
+        "base_rounds": [
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 3994.923813103834,
+            "success": 1,
+            "p50_ms": 11.764224,
+            "p95_ms": 13.995937,
+            "p99_ms": 15.586764,
+            "max_ms": 25.85423,
+            "status_codes": {
+              "200": 32000
+            },
+            "errors": []
+          },
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 3994.294851801522,
+            "success": 1,
+            "p50_ms": 12.258819,
+            "p95_ms": 15.139765,
+            "p99_ms": 17.496597,
+            "max_ms": 27.877506,
+            "status_codes": {
+              "200": 32000
+            },
+            "errors": []
+          }
+        ],
+        "headroom": {
+          "6000": {
+            "requests": 23999,
+            "target_rate": 6000,
+            "throughput": 5974.756137237438,
+            "success": 1,
+            "p50_ms": 20.56511,
+            "p95_ms": 34.798545,
+            "p99_ms": 44.138836,
+            "max_ms": 67.158909,
+            "status_codes": {
+              "200": 23999
+            },
+            "errors": [],
+            "pass": true
+          },
+          "8000": {
+            "requests": 28793,
+            "target_rate": 8000,
+            "throughput": 755.2350635598893,
+            "success": 0.8576042788177682,
+            "p50_ms": 195.890334,
+            "p95_ms": 30000.737562,
+            "p99_ms": 30001.076332,
+            "max_ms": 30006.240766,
+            "status_codes": {
+              "0": 4100,
+              "200": 24693
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Granian raw RSGI",
+      "slug": "granian_rsgi",
+      "delay_ms": 10,
+      "result": {
+        "status": "ok",
+        "base": {
+          "throughput": 3994.627746053011,
+          "success": 1,
+          "p50_ms": 11.6072685,
+          "p95_ms": 13.6890435,
+          "p99_ms": 15.90236,
+          "max_ms": 27.235142
+        },
+        "passes_4000_qps": true,
+        "base_rounds": [
+          {
+            "requests": 31998,
+            "target_rate": 4000,
+            "throughput": 3994.514131184153,
+            "success": 1,
+            "p50_ms": 11.641341,
+            "p95_ms": 13.891969,
+            "p99_ms": 16.718303,
+            "max_ms": 27.235142,
+            "status_codes": {
+              "200": 31998
+            },
+            "errors": []
+          },
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 3994.7413609218684,
+            "success": 1,
+            "p50_ms": 11.573196,
+            "p95_ms": 13.486118,
+            "p99_ms": 15.086417,
+            "max_ms": 23.606737,
+            "status_codes": {
+              "200": 32000
+            },
+            "errors": []
+          }
+        ],
+        "headroom": {
+          "6000": {
+            "requests": 23995,
+            "target_rate": 6000,
+            "throughput": 5974.347801794549,
+            "success": 1,
+            "p50_ms": 17.851431,
+            "p95_ms": 25.206544,
+            "p99_ms": 29.266412,
+            "max_ms": 42.112209,
+            "status_codes": {
+              "200": 23995
+            },
+            "errors": [],
+            "pass": true
+          },
+          "8000": {
+            "requests": 31665,
+            "target_rate": 8000,
+            "throughput": 820.498688672983,
+            "success": 0.8705195010263698,
+            "p50_ms": 156.596848,
+            "p95_ms": 30000.673794,
+            "p99_ms": 30001.067525,
+            "max_ms": 30025.975643,
+            "status_codes": {
+              "0": 4100,
+              "200": 27565
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Litestar + Granian",
+      "slug": "litestar",
+      "delay_ms": 10,
+      "result": {
+        "status": "ok",
+        "base": {
+          "throughput": 3994.0483544676154,
+          "success": 1,
+          "p50_ms": 13.006954,
+          "p95_ms": 16.398470500000002,
+          "p99_ms": 18.716442999999998,
+          "max_ms": 28.03153
+        },
+        "passes_4000_qps": true,
+        "base_rounds": [
+          {
+            "requests": 31999,
+            "target_rate": 4000,
+            "throughput": 3994.056505911609,
+            "success": 1,
+            "p50_ms": 13.00083,
+            "p95_ms": 16.482229,
+            "p99_ms": 18.887012,
+            "max_ms": 24.447064,
+            "status_codes": {
+              "200": 31999
+            },
+            "errors": []
+          },
+          {
+            "requests": 31999,
+            "target_rate": 4000,
+            "throughput": 3994.0402030236223,
+            "success": 1,
+            "p50_ms": 13.013078,
+            "p95_ms": 16.314712,
+            "p99_ms": 18.545874,
+            "max_ms": 28.03153,
+            "status_codes": {
+              "200": 31999
+            },
+            "errors": []
+          }
+        ],
+        "headroom": {
+          "6000": {
+            "requests": 24000,
+            "target_rate": 6000,
+            "throughput": 681.6359530291872,
+            "success": 0.9656666666666667,
+            "p50_ms": 152.224492,
+            "p95_ms": 252.561637,
+            "p99_ms": 30000.807573,
+            "max_ms": 30019.463364,
+            "status_codes": {
+              "0": 824,
+              "200": 23176
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          },
+          "8000": {
+            "requests": 17983,
+            "target_rate": 8000,
+            "throughput": 424.49419759122867,
+            "success": 0.7720068954012123,
+            "p50_ms": 471.387138,
+            "p95_ms": 30000.872119,
+            "p99_ms": 30001.128199,
+            "max_ms": 30024.939407,
+            "status_codes": {
+              "0": 4100,
+              "200": 13883
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
+      }
+    },
+    {
+      "name": "FastAPI + Granian",
+      "slug": "fastapi",
+      "delay_ms": 10,
+      "result": {
+        "status": "ok",
+        "base": {
+          "throughput": 2395.5350703908916,
+          "success": 0.9863125,
+          "p50_ms": 103.090913,
+          "p95_ms": 204.2528695,
+          "p99_ms": 15068.549622499999,
+          "max_ms": 30027.020532
+        },
+        "passes_4000_qps": false,
+        "base_rounds": [
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 3958.6868760552875,
+            "success": 1,
+            "p50_ms": 39.78641,
+            "p95_ms": 121.294784,
+            "p99_ms": 136.833075,
+            "max_ms": 171.290887,
+            "status_codes": {
+              "200": 32000
+            },
+            "errors": []
+          },
+          {
+            "requests": 32000,
+            "target_rate": 4000,
+            "throughput": 832.3832647264961,
+            "success": 0.9863125,
+            "p50_ms": 166.395416,
+            "p95_ms": 287.210955,
+            "p99_ms": 30000.26617,
+            "max_ms": 30027.020532,
+            "status_codes": {
+              "0": 438,
+              "200": 31562
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ]
+          }
+        ],
+        "headroom": {
+          "6000": {
+            "requests": 15861,
+            "target_rate": 6000,
+            "throughput": 370.8486065132039,
+            "success": 0.7415043187693083,
+            "p50_ms": 623.526315,
+            "p95_ms": 30000.918932,
+            "p99_ms": 30001.122275,
+            "max_ms": 30025.561968,
+            "status_codes": {
+              "0": 4100,
+              "200": 11761
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          },
+          "8000": {
+            "requests": 13997,
+            "target_rate": 8000,
+            "throughput": 318.5439637128088,
+            "success": 0.706937200828749,
+            "p50_ms": 1016.444886,
+            "p95_ms": 30000.961631,
+            "p99_ms": 30001.176654,
+            "max_ms": 30009.632335,
+            "status_codes": {
+              "0": 4102,
+              "200": 9895
+            },
+            "errors": [
+              "Get \"http://127.0.0.1:8000/api/1\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/10\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/5\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/17\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/13\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/15\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/18\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/8\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/4\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/3\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/20\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/16\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/11\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/12\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/19\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/6\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/14\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/2\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/7\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+              "Get \"http://127.0.0.1:8000/api/9\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+            ],
+            "pass": false
+          }
+        }
       }
     }
   ]

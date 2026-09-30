@@ -1,56 +1,74 @@
-# Dashboard workload benchmark
+# Dashboard 20-endpoint / 4000-QPS benchmark
 
-User workload modeled directly:
+Workload modeled from the target deployment:
 
 - 20 API endpoints.
 - 200 requests/second per endpoint.
-- 4,000 aggregate API requests/second worst case.
-- Each API request makes one outbound StarRocks-style HTTP SQL request.
-- 10-row small dashboard response.
-- No API local cache and no singleflight in the ranking.
-- StarRocks Query Cache is approximated by repeated per-endpoint SQL and low upstream latency.
+- 4,000 aggregate requests/second.
+- Every API request performs one StarRocks-style HTTP SQL call.
+- Small 10-row dashboard result.
+- No local result cache and no singleflight.
+- Repeated per-endpoint SQL approximates a hot Query Cache workload.
 - 4 application workers on a 4-vCPU GitHub runner.
-- Burst test schedules 4,000 total requests into a 200ms window to approximate synchronized dashboards.
+- Primary test: 4,000 QPS for 8 seconds, repeated twice.
+- Headroom tests: 6,000 and 8,000 QPS.
 
-## Simulated cached StarRocks latency: 2ms
+## Simulated hot StarRocks latency: 2ms
 
-| Rank | Stack | 4k target | Throughput | Success | steady p95 | steady p99 | burst p95 | burst p99 |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-| 1 | Jero + Granian | PASS | 3,995 | 100.000% | 5.03ms | 6.12ms | N/A | N/A |
-| 2 | Granian raw RSGI | PASS | 3,996 | 100.000% | 5.22ms | 6.71ms | N/A | N/A |
-| 3 | Litestar + Granian | PASS | 3,994 | 100.000% | 6.44ms | 7.64ms | N/A | N/A |
-| 4 | Sanic | PASS | 3,996 | 100.000% | 4.81ms | 13.57ms | N/A | N/A |
-| 5 | FastAPI + Granian | PASS | 3,989 | 100.000% | 23.97ms | 31.22ms | N/A | N/A |
-| 6 | Flask + Gunicorn gthread | FAIL | 2,831 | 100.000% | 1215.10ms | 1263.24ms | N/A | N/A |
+| Rank | Stack | 4k target | Throughput | Success | p95 | p99 | Max stable tested rate |
+|---:|---|---|---:|---:|---:|---:|---:|
+| 1 | Sanic | PASS | 3,999 | 100.000% | 4.61ms | 5.42ms | 6,000 QPS |
+| 2 | Jero + Granian | PASS | 3,999 | 100.000% | 5.11ms | 6.24ms | 6,000 QPS |
+| 3 | Granian raw RSGI | PASS | 3,999 | 100.000% | 5.38ms | 6.83ms | 6,000 QPS |
+| 4 | Litestar + Granian | PASS | 3,998 | 100.000% | 6.64ms | 8.14ms | 6,000 QPS |
+| 5 | FastAPI + Granian | PASS | 3,993 | 100.000% | 28.01ms | 38.94ms | 4,000 QPS |
+| 6 | Flask + Gunicorn gthread | FAIL | 1,886 | 100.000% | 5887.49ms | 6979.59ms | 0 QPS |
+| 7 | Quart + Granian | FAIL | 749 | 87.023% | 30000.69ms | 30001.05ms | 0 QPS |
 
-Failed: Quart + Granian (TimeoutExpired(['vegeta', 'attack', '-rate=4000/s', '-duration=3s', '-workers=64', '-max-workers=8192', '-targets=/home/runner/work/web_benchmark/web_benchmark/results/targets_steady.txt'], 20)); BustAPI (TimeoutError('timed out'))
+Failed/incompatible: BustAPI (startup/readiness: TimeoutError('timed out'))
 
-## Simulated cached StarRocks latency: 5ms
+## Simulated hot StarRocks latency: 5ms
 
-| Rank | Stack | 4k target | Throughput | Success | steady p95 | steady p99 | burst p95 | burst p99 |
-|---:|---|---|---:|---:|---:|---:|---:|---:|
-| 1 | Jero + Granian | PASS | 3,991 | 100.000% | 8.19ms | 9.35ms | N/A | N/A |
-| 2 | Granian raw RSGI | PASS | 3,993 | 100.000% | 9.35ms | 12.10ms | N/A | N/A |
-| 3 | Litestar + Granian | PASS | 3,992 | 100.000% | 10.53ms | 12.22ms | N/A | N/A |
-| 4 | Sanic | PASS | 3,992 | 100.000% | 8.13ms | 30.50ms | N/A | N/A |
-| 5 | FastAPI + Granian | PASS | 3,979 | 100.000% | 41.71ms | 59.39ms | N/A | N/A |
-| 6 | Flask + Gunicorn gthread | FAIL | 1,825 | 100.000% | 1388.79ms | 2938.29ms | N/A | N/A |
+| Rank | Stack | 4k target | Throughput | Success | p95 | p99 | Max stable tested rate |
+|---:|---|---|---:|---:|---:|---:|---:|
+| 1 | Sanic | PASS | 3,997 | 100.000% | 7.78ms | 9.86ms | 6,000 QPS |
+| 2 | Jero + Granian | PASS | 3,997 | 100.000% | 8.33ms | 9.97ms | 6,000 QPS |
+| 3 | Granian raw RSGI | PASS | 3,997 | 100.000% | 8.51ms | 10.26ms | 6,000 QPS |
+| 4 | Litestar + Granian | PASS | 3,997 | 100.000% | 10.08ms | 11.85ms | 6,000 QPS |
+| 5 | FastAPI + Granian | PASS | 3,992 | 100.000% | 38.10ms | 48.09ms | 4,000 QPS |
+| 6 | Flask + Gunicorn gthread | FAIL | 1,341 | 99.391% | 8299.23ms | 10369.52ms | 0 QPS |
+| 7 | Quart + Granian | FAIL | 627 | 82.233% | 30000.76ms | 30001.08ms | 0 QPS |
 
-Failed: Quart + Granian (TimeoutExpired(['vegeta', 'attack', '-rate=4000/s', '-duration=3s', '-workers=64', '-max-workers=8192', '-targets=/home/runner/work/web_benchmark/web_benchmark/results/targets_steady.txt'], 20)); BustAPI (TimeoutError('timed out'))
+Failed/incompatible: BustAPI (startup/readiness: TimeoutError('timed out'))
 
-## Overall decision
+## Simulated hot StarRocks latency: 10ms
 
-Primary score: number of StarRocks latency scenarios that sustain at least 3,900 completed requests/s with >=99.9% success. Ties use success rate and lower steady-state p99.
+| Rank | Stack | 4k target | Throughput | Success | p95 | p99 | Max stable tested rate |
+|---:|---|---|---:|---:|---:|---:|---:|
+| 1 | Sanic | PASS | 3,995 | 100.000% | 12.69ms | 13.83ms | 6,000 QPS |
+| 2 | Granian raw RSGI | PASS | 3,995 | 100.000% | 13.69ms | 15.90ms | 6,000 QPS |
+| 3 | Jero + Granian | PASS | 3,995 | 100.000% | 14.57ms | 16.54ms | 6,000 QPS |
+| 4 | Litestar + Granian | PASS | 3,994 | 100.000% | 16.40ms | 18.72ms | 4,000 QPS |
+| 5 | Flask + Gunicorn gthread | FAIL | 1,760 | 100.000% | 8792.50ms | 9446.39ms | 0 QPS |
+| 6 | FastAPI + Granian | FAIL | 2,396 | 98.631% | 204.25ms | 15068.55ms | 0 QPS |
+| 7 | Quart + Granian | FAIL | 722 | 86.364% | 30000.71ms | 30001.06ms | 0 QPS |
 
-| Rank | Stack | Scenarios passing 4k target | Mean steady p99 |
-|---:|---|---:|---:|
-| 1 | Jero + Granian | 2/2 | 7.74ms |
-| 2 | Granian raw RSGI | 2/2 | 9.41ms |
-| 3 | Litestar + Granian | 2/2 | 9.93ms |
-| 4 | Sanic | 2/2 | 22.03ms |
-| 5 | FastAPI + Granian | 2/2 | 45.30ms |
-| 6 | Flask + Gunicorn gthread | 0/2 | 2100.76ms |
+Failed/incompatible: BustAPI (startup/readiness: TimeoutError('timed out'))
 
-Measured winner for this exact 4-vCPU CI workload: **Jero + Granian**.
+## Overall
 
-Production capacity must still be verified on the real 16-core API host against the real StarRocks FE/LB. The CI benchmark is intended to choose the framework, not to predict absolute 16-core capacity.
+Ranking priority: first sustain the required 4,000 QPS in all latency scenarios, then maximize tested headroom, then minimize p99.
+
+| Rank | Stack | 4k scenarios passed | Minimum tested headroom | Mean p95 | Mean p99 |
+|---:|---|---:|---:|---:|---:|
+| 1 | Sanic | 3/3 | 6,000 QPS | 8.36ms | 9.70ms |
+| 2 | Jero + Granian | 3/3 | 6,000 QPS | 9.34ms | 10.92ms |
+| 3 | Granian raw RSGI | 3/3 | 6,000 QPS | 9.19ms | 11.00ms |
+| 4 | Litestar + Granian | 3/3 | 4,000 QPS | 11.04ms | 12.90ms |
+| 5 | FastAPI + Granian | 2/3 | 0 QPS | 90.12ms | 5051.86ms |
+| 6 | Flask + Gunicorn gthread | 0/3 | 0 QPS | 7659.74ms | 8931.83ms |
+| 7 | Quart + Granian | 0/3 | 0 QPS | 30000.72ms | 30001.06ms |
+
+Measured winner on this CI workload: **Sanic**.
+
+Use this result to choose the framework. Absolute production capacity must still be verified on the actual 16-core API host against the real StarRocks 4.1.1 FE/LB.
