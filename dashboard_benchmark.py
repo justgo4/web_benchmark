@@ -270,13 +270,21 @@ def benchmark_case(case, py, delay_ms, steady_targets, burst_targets):
                 vegeta_attack(steady_targets, STEADY_RATE, STEADY_SECONDS)
                 for _ in range(STEADY_ROUNDS)
             ]
-            burst_rounds = [
-                vegeta_attack(burst_targets, BURST_RATE, BURST_SECONDS)
-                for _ in range(BURST_ROUNDS)
-            ]
-
             steady = summarize_rounds(steady_rounds)
-            burst = summarize_rounds(burst_rounds)
+
+            burst_rounds = []
+            burst = None
+            burst_error = None
+            if BURST_ROUNDS > 0:
+                try:
+                    burst_rounds = [
+                        vegeta_attack(burst_targets, BURST_RATE, BURST_SECONDS)
+                        for _ in range(BURST_ROUNDS)
+                    ]
+                    burst = summarize_rounds(burst_rounds)
+                except Exception as exc:
+                    burst_error = repr(exc)
+
             passes_target = (
                 steady["throughput"] >= 3900
                 and steady["success"] >= 0.999
@@ -286,6 +294,7 @@ def benchmark_case(case, py, delay_ms, steady_targets, burst_targets):
                 "status": "ok",
                 "steady": steady,
                 "burst": burst,
+                "burst_error": burst_error,
                 "passes_4000_qps": passes_target,
                 "steady_rounds": steady_rounds,
                 "burst_rounds": burst_rounds,
@@ -397,12 +406,14 @@ def write_results(rows):
         for rank, row in enumerate(subset, 1):
             result = row["result"]
             steady = result["steady"]
-            burst = result["burst"]
+            burst = result.get("burst")
+            burst_p95 = f"{burst['p95_ms']:.2f}ms" if burst else "N/A"
+            burst_p99 = f"{burst['p99_ms']:.2f}ms" if burst else "N/A"
             lines.append(
                 f"| {rank} | {row['name']} | {'PASS' if result['passes_4000_qps'] else 'FAIL'} | "
                 f"{steady['throughput']:,.0f} | {steady['success'] * 100:.3f}% | "
                 f"{steady['p95_ms']:.2f}ms | {steady['p99_ms']:.2f}ms | "
-                f"{burst['p95_ms']:.2f}ms | {burst['p99_ms']:.2f}ms |"
+                f"{burst_p95} | {burst_p99} |"
             )
         failed = [x for x in rows if x["delay_ms"] == delay and x["result"]["status"] != "ok"]
         if failed:
