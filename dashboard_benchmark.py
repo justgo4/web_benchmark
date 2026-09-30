@@ -18,13 +18,17 @@ WORKERS = 4
 ROWS = 10
 
 STEADY_RATE = 4000
-STEADY_SECONDS = 8
-STEADY_ROUNDS = 2
+STEADY_SECONDS = int(os.getenv("DASHBOARD_STEADY_SECONDS", "8"))
+STEADY_ROUNDS = int(os.getenv("DASHBOARD_STEADY_ROUNDS", "2"))
 BURST_RATE = 20000
-BURST_SECONDS = 0.2
-BURST_ROUNDS = 2
+BURST_SECONDS = float(os.getenv("DASHBOARD_BURST_SECONDS", "0.2"))
+BURST_ROUNDS = int(os.getenv("DASHBOARD_BURST_ROUNDS", "2"))
 
-DELAYS_MS = [2, 5, 10]
+DELAYS_MS = [
+    int(x.strip())
+    for x in os.getenv("DASHBOARD_DELAYS_MS", "2,5,10").split(",")
+    if x.strip()
+]
 
 CASES = [
     {
