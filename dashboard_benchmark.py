@@ -14,21 +14,17 @@ VENVS = ROOT / ".dashboard_venvs"
 RESULTS = ROOT / "results"
 LOGS = RESULTS / "dashboard_logs"
 URL = "http://127.0.0.1:8000/api/1"
+
 WORKERS = 4
 ROWS = 10
+DELAYS_MS = [2, 5, 10]
 
-STEADY_RATE = 4000
-STEADY_SECONDS = int(os.getenv("DASHBOARD_STEADY_SECONDS", "8"))
-STEADY_ROUNDS = int(os.getenv("DASHBOARD_STEADY_ROUNDS", "2"))
-BURST_RATE = 20000
-BURST_SECONDS = float(os.getenv("DASHBOARD_BURST_SECONDS", "0.2"))
-BURST_ROUNDS = int(os.getenv("DASHBOARD_BURST_ROUNDS", "2"))
+BASE_RATE = 4000
+BASE_SECONDS = 8
+BASE_ROUNDS = 2
 
-DELAYS_MS = [
-    int(x.strip())
-    for x in os.getenv("DASHBOARD_DELAYS_MS", "2,5,10").split(",")
-    if x.strip()
-]
+HEADROOM_RATES = [6000, 8000]
+HEADROOM_SECONDS = 4
 
 CASES = [
     {
@@ -103,21 +99,6 @@ def run(cmd, *, env=None, timeout=None, check=True, input_bytes=None):
     )
 
 
-def install_case(case):
-    path = VENVS / case["slug"]
-    if path.exists():
-        import shutil
-        shutil.rmtree(path)
-    subprocess.run([sys.executable, "-m", "venv", str(path)], check=True)
-    py = path / "bin" / "python"
-    proc = run(
-        ["uv", "pip", "install", "--python", str(py), "--upgrade"] + case["packages"],
-        timeout=600,
-    )
-    (LOGS / f"{case['slug']}.install.log").write_bytes(proc.stdout + proc.stderr)
-    return py
-
-
 def stop_process(proc):
     if proc is None or proc.poll() is not None:
         return
@@ -140,13 +121,36 @@ def wait_ready(proc, timeout=30):
         try:
             with urllib.request.urlopen(URL, timeout=2) as response:
                 body = json.loads(response.read())
-                if response.status == 200 and body.get("code") == 0 and body.get("count") == ROWS:
+                if (
+                    response.status == 200
+                    and body.get("code") == 0
+                    and body.get("count") == ROWS
+                ):
                     return True, ""
                 last = repr(body)
         except Exception as exc:
             last = repr(exc)
         time.sleep(0.2)
     return False, last
+
+
+def install_case(case):
+    import shutil
+
+    path = VENVS / case["slug"]
+    if path.exists():
+        shutil.rmtree(path)
+    subprocess.run([sys.executable, "-m", "venv", str(path)], check=True)
+    py = path / "bin" / "python"
+    proc = run(
+        ["uv", "pip", "install", "--python", str(py), "--upgrade"]
+        + case["packages"],
+        timeout=600,
+    )
+    (LOGS / f"{case['slug']}.install.log").write_bytes(
+        proc.stdout + proc.stderr
+    )
+    return py
 
 
 def server_command(case, py):
@@ -202,10 +206,12 @@ def vegeta_attack(targets, rate, seconds):
             "-max-workers=8192",
             f"-targets={targets}",
         ],
-        timeout=max(20, int(seconds) + 15),
+        timeout=seconds + 45,
     )
     if attack.returncode != 0:
-        raise RuntimeError(attack.stderr.decode("utf-8", "replace"))
+        raise RuntimeError(
+            attack.stderr.decode("utf-8", "replace")
+        )
 
     report = run(
         ["vegeta", "report", "-type=json"],
@@ -213,7 +219,9 @@ def vegeta_attack(targets, rate, seconds):
         timeout=20,
     )
     if report.returncode != 0:
-        raise RuntimeError(report.stderr.decode("utf-8", "replace"))
+        raise RuntimeError(
+            report.stderr.decode("utf-8", "replace")
+        )
 
     data = json.loads(report.stdout)
     lat = data["latencies"]
@@ -233,7 +241,9 @@ def vegeta_attack(targets, rate, seconds):
 
 def summarize_rounds(rounds):
     return {
-        "throughput": statistics.median(x["throughput"] for x in rounds),
+        "throughput": statistics.median(
+            x["throughput"] for x in rounds
+        ),
         "success": min(x["success"] for x in rounds),
         "p50_ms": statistics.median(x["p50_ms"] for x in rounds),
         "p95_ms": statistics.median(x["p95_ms"] for x in rounds),
@@ -242,12 +252,21 @@ def summarize_rounds(rounds):
     }
 
 
-def benchmark_case(case, py, delay_ms, steady_targets, burst_targets):
+def rate_pass(result, target_rate, tolerance=0.975):
+    return (
+        result["throughput"] >= target_rate * tolerance
+        and result["success"] >= 0.999
+    )
+
+
+def benchmark_case(case, py, delay_ms, target_files):
     env = os.environ.copy()
     env["DASHBOARD_APP"] = case["kind"]
     env["DASHBOARD_WORKERS"] = str(WORKERS)
     env["DASHBOARD_ROWS"] = str(ROWS)
-    env["DASHBOARD_STARROCKS_URL"] = "http://127.0.0.1:18030/sql"
+    env["DASHBOARD_STARROCKS_URL"] = (
+        "http://127.0.0.1:18030/sql"
+    )
     env["PYTHONUNBUFFERED"] = "1"
     env["PATH"] = f"{py.parent}:{env.get('PATH', '')}"
 
@@ -264,40 +283,47 @@ def benchmark_case(case, py, delay_ms, steady_targets, burst_targets):
         try:
             ok, detail = wait_ready(proc)
             if not ok:
-                return {"status": "failed", "error": detail}
+                return {
+                    "status": "failed",
+                    "error": f"startup/readiness: {detail}",
+                }
 
-            steady_rounds = [
-                vegeta_attack(steady_targets, STEADY_RATE, STEADY_SECONDS)
-                for _ in range(STEADY_ROUNDS)
-            ]
-            steady = summarize_rounds(steady_rounds)
+            base_rounds = []
+            for _ in range(BASE_ROUNDS):
+                base_rounds.append(
+                    vegeta_attack(
+                        target_files[BASE_RATE],
+                        BASE_RATE,
+                        BASE_SECONDS,
+                    )
+                )
+            base = summarize_rounds(base_rounds)
 
-            burst_rounds = []
-            burst = None
-            burst_error = None
-            if BURST_ROUNDS > 0:
+            headroom = {}
+            for rate in HEADROOM_RATES:
                 try:
-                    burst_rounds = [
-                        vegeta_attack(burst_targets, BURST_RATE, BURST_SECONDS)
-                        for _ in range(BURST_ROUNDS)
-                    ]
-                    burst = summarize_rounds(burst_rounds)
+                    result = vegeta_attack(
+                        target_files[rate],
+                        rate,
+                        HEADROOM_SECONDS,
+                    )
+                    result["pass"] = rate_pass(result, rate)
+                    headroom[str(rate)] = result
                 except Exception as exc:
-                    burst_error = repr(exc)
-
-            passes_target = (
-                steady["throughput"] >= 3900
-                and steady["success"] >= 0.999
-            )
+                    headroom[str(rate)] = {
+                        "pass": False,
+                        "error": repr(exc),
+                    }
 
             return {
                 "status": "ok",
-                "steady": steady,
-                "burst": burst,
-                "burst_error": burst_error,
-                "passes_4000_qps": passes_target,
-                "steady_rounds": steady_rounds,
-                "burst_rounds": burst_rounds,
+                "base": base,
+                "passes_4000_qps": rate_pass(
+                    base,
+                    BASE_RATE,
+                ),
+                "base_rounds": base_rounds,
+                "headroom": headroom,
             }
         finally:
             stop_process(proc)
@@ -326,27 +352,47 @@ def start_mock(delay_ms):
         stderr=subprocess.STDOUT,
         start_new_session=True,
     )
+
     deadline = time.time() + 20
     while time.time() < deadline:
         if proc.poll() is not None:
             log.close()
-            raise RuntimeError(f"mock exited with {proc.returncode}")
+            raise RuntimeError(
+                f"mock exited with {proc.returncode}"
+            )
         try:
             req = urllib.request.Request(
                 "http://127.0.0.1:18030/sql",
                 data=b'{"query":"select 1"}',
-                headers={"Content-Type": "application/json"},
+                headers={
+                    "Content-Type": "application/json"
+                },
                 method="POST",
             )
-            with urllib.request.urlopen(req, timeout=2) as response:
+            with urllib.request.urlopen(
+                req,
+                timeout=2,
+            ) as response:
                 if response.status == 200:
                     return proc, log
         except Exception:
             pass
         time.sleep(0.2)
+
     stop_process(proc)
     log.close()
     raise RuntimeError("mock did not become ready")
+
+
+def highest_headroom(result):
+    if result["status"] != "ok":
+        return 0
+    highest = BASE_RATE if result["passes_4000_qps"] else 0
+    for rate in HEADROOM_RATES:
+        item = result["headroom"].get(str(rate), {})
+        if item.get("pass"):
+            highest = rate
+    return highest
 
 
 def write_results(rows):
@@ -357,108 +403,187 @@ def write_results(rows):
             "aggregate_qps": 4000,
             "rows_per_response": ROWS,
             "workers": WORKERS,
-            "steady_seconds": STEADY_SECONDS,
-            "burst": "4000 total requests scheduled inside 200ms",
-            "starrocks_query_cache": "modeled as repeated per-endpoint query with low upstream latency",
+            "base_rate": BASE_RATE,
+            "base_seconds": BASE_SECONDS,
+            "base_rounds": BASE_ROUNDS,
+            "headroom_rates": HEADROOM_RATES,
+            "headroom_seconds": HEADROOM_SECONDS,
+            "starrocks_query_cache": (
+                "modeled as repeated endpoint SQL with "
+                "2/5/10ms upstream latency"
+            ),
             "local_api_cache": False,
             "singleflight": False,
         },
         "results": rows,
     }
+
     (RESULTS / "dashboard_latest.json").write_text(
         json.dumps(payload, indent=2),
         encoding="utf-8",
     )
 
     lines = [
-        "# Dashboard workload benchmark",
+        "# Dashboard 20-endpoint / 4000-QPS benchmark",
         "",
-        "User workload modeled directly:",
+        "Workload modeled from the target deployment:",
         "",
         "- 20 API endpoints.",
         "- 200 requests/second per endpoint.",
-        "- 4,000 aggregate API requests/second worst case.",
-        "- Each API request makes one outbound StarRocks-style HTTP SQL request.",
-        "- 10-row small dashboard response.",
-        "- No API local cache and no singleflight in the ranking.",
-        "- StarRocks Query Cache is approximated by repeated per-endpoint SQL and low upstream latency.",
+        "- 4,000 aggregate requests/second.",
+        "- Every API request performs one StarRocks-style HTTP SQL call.",
+        "- Small 10-row dashboard result.",
+        "- No local result cache and no singleflight.",
+        "- Repeated per-endpoint SQL approximates a hot Query Cache workload.",
         "- 4 application workers on a 4-vCPU GitHub runner.",
-        "- Burst test schedules 4,000 total requests into a 200ms window to approximate synchronized dashboards.",
+        "- Primary test: 4,000 QPS for 8 seconds, repeated twice.",
+        "- Headroom tests: 6,000 and 8,000 QPS.",
         "",
     ]
 
     for delay in DELAYS_MS:
-        subset = [x for x in rows if x["delay_ms"] == delay and x["result"]["status"] == "ok"]
-        subset.sort(
-            key=lambda x: (
-                x["result"]["passes_4000_qps"],
-                x["result"]["steady"]["success"],
-                -x["result"]["steady"]["p99_ms"],
-            ),
-            reverse=True,
-        )
-        lines += [
-            f"## Simulated cached StarRocks latency: {delay}ms",
-            "",
-            "| Rank | Stack | 4k target | Throughput | Success | steady p95 | steady p99 | burst p95 | burst p99 |",
-            "|---:|---|---|---:|---:|---:|---:|---:|---:|",
+        subset = [
+            x for x in rows
+            if x["delay_ms"] == delay
         ]
-        for rank, row in enumerate(subset, 1):
+
+        def sort_key(row):
             result = row["result"]
-            steady = result["steady"]
-            burst = result.get("burst")
-            burst_p95 = f"{burst['p95_ms']:.2f}ms" if burst else "N/A"
-            burst_p99 = f"{burst['p99_ms']:.2f}ms" if burst else "N/A"
-            lines.append(
-                f"| {rank} | {row['name']} | {'PASS' if result['passes_4000_qps'] else 'FAIL'} | "
-                f"{steady['throughput']:,.0f} | {steady['success'] * 100:.3f}% | "
-                f"{steady['p95_ms']:.2f}ms | {steady['p99_ms']:.2f}ms | "
-                f"{burst_p95} | {burst_p99} |"
+            if result["status"] != "ok":
+                return (-1, -1, -999999)
+            return (
+                int(result["passes_4000_qps"]),
+                highest_headroom(result),
+                -result["base"]["p99_ms"],
             )
-        failed = [x for x in rows if x["delay_ms"] == delay and x["result"]["status"] != "ok"]
+
+        subset.sort(key=sort_key, reverse=True)
+
+        lines += [
+            f"## Simulated hot StarRocks latency: {delay}ms",
+            "",
+            "| Rank | Stack | 4k target | Throughput | Success | p95 | p99 | Max stable tested rate |",
+            "|---:|---|---|---:|---:|---:|---:|---:|",
+        ]
+
+        rank = 0
+        for row in subset:
+            result = row["result"]
+            if result["status"] != "ok":
+                continue
+            rank += 1
+            base = result["base"]
+            lines.append(
+                f"| {rank} | {row['name']} | "
+                f"{'PASS' if result['passes_4000_qps'] else 'FAIL'} | "
+                f"{base['throughput']:,.0f} | "
+                f"{base['success'] * 100:.3f}% | "
+                f"{base['p95_ms']:.2f}ms | "
+                f"{base['p99_ms']:.2f}ms | "
+                f"{highest_headroom(result):,} QPS |"
+            )
+
+        failed = [
+            x for x in subset
+            if x["result"]["status"] != "ok"
+        ]
         if failed:
-            lines += ["", "Failed: " + "; ".join(
-                f"{x['name']} ({x['result'].get('error', 'unknown')})" for x in failed
-            )]
+            lines += [
+                "",
+                "Failed/incompatible: "
+                + "; ".join(
+                    f"{x['name']} "
+                    f"({x['result'].get('error', 'unknown')})"
+                    for x in failed
+                ),
+            ]
         lines.append("")
 
-    eligible = {}
+    complete = {}
     for row in rows:
-        if row["result"]["status"] != "ok":
-            continue
-        eligible.setdefault(row["name"], []).append(row["result"])
+        result = row["result"]
+        if result["status"] == "ok":
+            complete.setdefault(
+                row["name"],
+                [],
+            ).append(result)
 
     scored = []
-    for name, values in eligible.items():
+    for name, values in complete.items():
         if len(values) != len(DELAYS_MS):
             continue
-        passes = sum(v["passes_4000_qps"] for v in values)
-        avg_p99 = statistics.mean(v["steady"]["p99_ms"] for v in values)
-        avg_success = statistics.mean(v["steady"]["success"] for v in values)
-        scored.append((passes, avg_success, -avg_p99, name, avg_p99))
+        pass_count = sum(
+            x["passes_4000_qps"] for x in values
+        )
+        min_headroom = min(
+            highest_headroom(x) for x in values
+        )
+        mean_p99 = statistics.mean(
+            x["base"]["p99_ms"] for x in values
+        )
+        mean_p95 = statistics.mean(
+            x["base"]["p95_ms"] for x in values
+        )
+        scored.append(
+            (
+                pass_count,
+                min_headroom,
+                -mean_p99,
+                name,
+                mean_p95,
+                mean_p99,
+            )
+        )
 
     scored.sort(reverse=True)
+
     lines += [
-        "## Overall decision",
+        "## Overall",
         "",
-        "Primary score: number of StarRocks latency scenarios that sustain at least 3,900 completed requests/s with >=99.9% success. Ties use success rate and lower steady-state p99.",
+        (
+            "Ranking priority: first sustain the required 4,000 QPS "
+            "in all latency scenarios, then maximize tested headroom, "
+            "then minimize p99."
+        ),
         "",
-        "| Rank | Stack | Scenarios passing 4k target | Mean steady p99 |",
-        "|---:|---|---:|---:|",
+        "| Rank | Stack | 4k scenarios passed | Minimum tested headroom | Mean p95 | Mean p99 |",
+        "|---:|---|---:|---:|---:|---:|",
     ]
+
     for rank, item in enumerate(scored, 1):
-        passes, _, _, name, avg_p99 = item
-        lines.append(f"| {rank} | {name} | {passes}/{len(DELAYS_MS)} | {avg_p99:.2f}ms |")
+        (
+            pass_count,
+            min_headroom,
+            _,
+            name,
+            mean_p95,
+            mean_p99,
+        ) = item
+        lines.append(
+            f"| {rank} | {name} | "
+            f"{pass_count}/{len(DELAYS_MS)} | "
+            f"{min_headroom:,} QPS | "
+            f"{mean_p95:.2f}ms | "
+            f"{mean_p99:.2f}ms |"
+        )
 
     if scored:
         lines += [
             "",
-            f"Measured winner for this exact 4-vCPU CI workload: **{scored[0][3]}**.",
+            f"Measured winner on this CI workload: **{scored[0][3]}**.",
             "",
-            "Production capacity must still be verified on the real 16-core API host against the real StarRocks FE/LB. The CI benchmark is intended to choose the framework, not to predict absolute 16-core capacity.",
+            (
+                "Use this result to choose the framework. Absolute "
+                "production capacity must still be verified on the "
+                "actual 16-core API host against the real StarRocks "
+                "4.1.1 FE/LB."
+            ),
         ]
 
-    (ROOT / "DASHBOARD_BENCHMARK.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (ROOT / "DASHBOARD_BENCHMARK.md").write_text(
+        "\n".join(lines) + "\n",
+        encoding="utf-8",
+    )
 
 
 def main():
@@ -466,10 +591,14 @@ def main():
     LOGS.mkdir(parents=True, exist_ok=True)
     RESULTS.mkdir(exist_ok=True)
 
-    steady_targets = RESULTS / "targets_steady.txt"
-    burst_targets = RESULTS / "targets_burst.txt"
-    make_targets(steady_targets, STEADY_RATE * STEADY_SECONDS)
-    make_targets(burst_targets, int(BURST_RATE * BURST_SECONDS))
+    target_files = {}
+    for rate, seconds in [
+        (BASE_RATE, BASE_SECONDS),
+        *[(rate, HEADROOM_SECONDS) for rate in HEADROOM_RATES],
+    ]:
+        path = RESULTS / f"targets_{rate}.txt"
+        make_targets(path, rate * seconds)
+        target_files[rate] = path
 
     pythons = {}
     for case in CASES:
@@ -477,30 +606,46 @@ def main():
         try:
             pythons[case["slug"]] = install_case(case)
         except Exception as exc:
-            print(f"install failed {case['name']}: {exc}", flush=True)
+            print(
+                f"install failed {case['name']}: {exc}",
+                flush=True,
+            )
             pythons[case["slug"]] = None
 
     rows = []
     for delay in DELAYS_MS:
-        print(f"\n=== mock StarRocks latency {delay}ms ===", flush=True)
+        print(
+            f"\n=== mock StarRocks latency {delay}ms ===",
+            flush=True,
+        )
         mock, mock_log = start_mock(delay)
         try:
             for case in CASES:
                 py = pythons[case["slug"]]
-                print(f"--- {case['name']} ---", flush=True)
+                print(
+                    f"--- {case['name']} ---",
+                    flush=True,
+                )
+
                 if py is None:
-                    result = {"status": "failed", "error": "install failed"}
+                    result = {
+                        "status": "failed",
+                        "error": "install failed",
+                    }
                 else:
                     try:
                         result = benchmark_case(
                             case,
                             py,
                             delay,
-                            steady_targets,
-                            burst_targets,
+                            target_files,
                         )
                     except Exception as exc:
-                        result = {"status": "failed", "error": repr(exc)}
+                        result = {
+                            "status": "failed",
+                            "error": repr(exc),
+                        }
+
                 row = {
                     "name": case["name"],
                     "slug": case["slug"],
@@ -508,7 +653,10 @@ def main():
                     "result": result,
                 }
                 rows.append(row)
-                print(json.dumps(row, indent=2), flush=True)
+                print(
+                    json.dumps(row, indent=2),
+                    flush=True,
+                )
         finally:
             stop_process(mock)
             mock_log.close()
