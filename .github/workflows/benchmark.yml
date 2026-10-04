@@ -11,6 +11,10 @@ on:
       - DASHBOARD_BENCHMARK.md
       - dashboard_*.py
       - .github/workflows/dashboard.yml
+      - starrocks_async_benchmark.py
+      - STARROCKS_ASYNC_BENCHMARK.md
+      - .github/workflows/starrocks_async.yml
+      - results/starrocks_async_latest.json
       - results/**
 
 permissions:
