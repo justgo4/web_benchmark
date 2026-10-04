@@ -1,0 +1,99 @@
+name: StarRocks async client benchmark
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - starrocks_async_benchmark.py
+      - .github/workflows/starrocks_async.yml
+
+permissions:
+  contents: write
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Free disk space if needed
+        shell: bash
+        run: |
+          FREE_GB=$(df --output=avail -BG / | tail -1 | tr -dc '0-9')
+          if [ "${FREE_GB}" -lt 12 ]; then
+            sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet || true
+            docker system prune -af || true
+          fi
+          df -h
+
+      - name: Install async clients
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install             pymysql             asyncmy             aiomysql             mysql-connector-python             pyreqwest             adbc-driver-manager             adbc-driver-flightsql             pyarrow
+
+      - name: Start StarRocks 4.1.1
+        shell: bash
+        run: |
+          docker pull starrocks/allin1-ubuntu:4.1.1
+          docker run -d             --name starrocks             -p 8030:8030             -p 8040:8040             -p 9030:9030             -p 9408:9408             -p 9419:9419             -e 'JAVA_TOOL_OPTIONS=--add-opens=java.base/java.nio=org.apache.arrow.memory.core,ALL-UNNAMED'             starrocks/allin1-ubuntu:4.1.1             bash -lc '
+              echo "arrow_flight_port = 9408" >> /data/deploy/starrocks/fe/conf/fe.conf
+              echo "arrow_flight_port = 9419" >> /data/deploy/starrocks/be/conf/be.conf
+              echo "query_cache_capacity = 536870912" >> /data/deploy/starrocks/be/conf/be.conf
+              exec ./entrypoint.sh
+            '
+          docker ps -a
+
+      - name: Run async client benchmark
+        env:
+          SR_ASYNC_ROWS: "1000000"
+          SR_ASYNC_POOL: "160"
+          SR_ASYNC_FLIGHT_POOL: "64"
+          SR_ASYNC_WORKERS: "512"
+          SR_ASYNC_TIMEOUT: "2.0"
+          SR_ASYNC_LOADS: "2000:3,4000:5,6000:3"
+        run: python starrocks_async_benchmark.py
+
+      - name: Show benchmark result
+        if: always()
+        run: |
+          test -f STARROCKS_ASYNC_BENCHMARK.md && cat STARROCKS_ASYNC_BENCHMARK.md || true
+          test -f results/starrocks_async_latest.json && cat results/starrocks_async_latest.json || true
+
+      - name: Capture diagnostics
+        if: always()
+        run: |
+          mkdir -p results/starrocks_async_logs
+          docker logs starrocks > results/starrocks_async_logs/container.log 2>&1 || true
+          docker exec starrocks bash -lc 'tail -n 400 /data/deploy/starrocks/fe/log/fe.log'             > results/starrocks_async_logs/fe.log 2>&1 || true
+          docker exec starrocks bash -lc 'tail -n 400 /data/deploy/starrocks/be/log/be.INFO'             > results/starrocks_async_logs/be.log 2>&1 || true
+          curl -s http://127.0.0.1:8040/metrics | grep query_cache             > results/starrocks_async_logs/query_cache_metrics.txt || true
+          docker ps -a > results/starrocks_async_logs/docker_ps.txt || true
+          df -h > results/starrocks_async_logs/disk.txt || true
+
+      - name: Upload benchmark artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: starrocks-async-${{ github.run_id }}
+          path: |
+            STARROCKS_ASYNC_BENCHMARK.md
+            results/starrocks_async_latest.json
+            results/starrocks_async_logs/
+          if-no-files-found: warn
+
+      - name: Commit benchmark result
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add STARROCKS_ASYNC_BENCHMARK.md results/starrocks_async_latest.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Record StarRocks async client benchmark [skip ci]"
+          git push
