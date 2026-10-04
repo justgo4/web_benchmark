@@ -1,0 +1,225 @@
+{
+  "meta": {
+    "generated_utc": "2026-10-04T16:49:25.471841+00:00",
+    "starrocks_version": "4.1.1-14b7e3f",
+    "rows_loaded": 1000000,
+    "load_seconds": 0.8298219340000088,
+    "query_cache_variable": [
+      "enable_query_cache",
+      "true"
+    ],
+    "query_cache_before": {
+      "capacity": 536870912,
+      "usage": 0,
+      "usage_ratio": 0.0,
+      "lookup_count": 0,
+      "hit_count": 0,
+      "hit_ratio": 0.0
+    },
+    "query_cache_after_warm": {
+      "capacity": 536870912,
+      "usage": 62880,
+      "usage_ratio": 0.00011712312698364258,
+      "lookup_count": 160,
+      "hit_count": 0,
+      "hit_ratio": 0.0
+    },
+    "query_cache_after": {
+      "capacity": 536870912,
+      "usage": 62880,
+      "usage_ratio": 0.00011712312698364258,
+      "lookup_count": 61768,
+      "hit_count": 61608,
+      "hit_ratio": 0.9974096619608859
+    },
+    "pool_size": 160,
+    "flight_pool_size": 64,
+    "scheduler_workers": 512,
+    "request_timeout_s": 2.0,
+    "drain_limit_s": 5.0,
+    "loads": [
+      [
+        2000,
+        3.0
+      ],
+      [
+        4000,
+        5.0
+      ],
+      [
+        6000,
+        3.0
+      ]
+    ],
+    "endpoints": 20,
+    "primary_target_qps": 4000,
+    "per_endpoint_qps_at_primary": 200,
+    "result_rows_per_request": 10
+  },
+  "results": [
+    {
+      "name": "pyreqwest async HTTP",
+      "package": "pyreqwest",
+      "version": "0.14.0",
+      "pool_size": 160,
+      "native_async": true,
+      "status": "ok",
+      "loads": [
+        {
+          "offered_qps": 2000,
+          "duration_s": 3.0,
+          "requests": 6000,
+          "attempted": 2692,
+          "completed": 219,
+          "query_failed": 2473,
+          "dropped": 3308,
+          "failed": 5781,
+          "success_rate": 0.0365,
+          "attempt_success_rate": 0.08135215453194651,
+          "achieved_qps": 21.92425772443925,
+          "actual_elapsed_s": 9.988935669,
+          "drain_exhausted": true,
+          "service_p50_ms": 1397.1617370000047,
+          "service_p95_ms": 1964.3953500000039,
+          "service_p99_ms": 1991.3764100000008,
+          "e2e_p50_ms": 1397.7363350000046,
+          "e2e_p95_ms": 1964.687337000015,
+          "e2e_p99_ms": 1999.3329890000098,
+          "schedule_lag_p99_ms": 6665.957499000016,
+          "median_json_bytes": 371,
+          "errors": {
+            "TimeoutError: ": 1436,
+            "StatusError: ('HTTP status server error', {'causes': None, 'status': 500})": 1037
+          }
+        }
+      ],
+      "startup_s": 0.012605448000002184,
+      "warm_ok": true
+    },
+    {
+      "name": "asyncmy",
+      "package": "asyncmy",
+      "version": "0.2.15",
+      "pool_size": 160,
+      "native_async": true,
+      "status": "ok",
+      "loads": [
+        {
+          "offered_qps": 2000,
+          "duration_s": 3.0,
+          "requests": 6000,
+          "attempted": 3030,
+          "completed": 2087,
+          "query_failed": 943,
+          "dropped": 2970,
+          "failed": 3913,
+          "success_rate": 0.3478333333333333,
+          "attempt_success_rate": 0.6887788778877888,
+          "achieved_qps": 224.14292132814413,
+          "actual_elapsed_s": 9.311023465000005,
+          "drain_exhausted": true,
+          "service_p50_ms": 1153.158599000008,
+          "service_p95_ms": 1841.7813800000004,
+          "service_p99_ms": 1964.8569960000088,
+          "e2e_p50_ms": 4651.065076000009,
+          "e2e_p95_ms": 7630.472661000013,
+          "e2e_p99_ms": 7903.972678000002,
+          "schedule_lag_p99_ms": 6415.174182000015,
+          "median_json_bytes": 371,
+          "errors": {
+            "TimeoutError: ": 943
+          }
+        }
+      ],
+      "startup_s": 1.193281565999996,
+      "warm_ok": true
+    },
+    {
+      "name": "aiomysql",
+      "package": "aiomysql",
+      "version": "0.3.2",
+      "pool_size": 160,
+      "native_async": true,
+      "status": "ok",
+      "loads": [
+        {
+          "offered_qps": 2000,
+          "duration_s": 3.0,
+          "requests": 6000,
+          "attempted": 3193,
+          "completed": 2345,
+          "query_failed": 848,
+          "dropped": 2807,
+          "failed": 3655,
+          "success_rate": 0.3908333333333333,
+          "attempt_success_rate": 0.7344190416536173,
+          "achieved_qps": 254.6705646774253,
+          "actual_elapsed_s": 9.20797424300001,
+          "drain_exhausted": true,
+          "service_p50_ms": 1163.4480339999982,
+          "service_p95_ms": 1893.047788000004,
+          "service_p99_ms": 1981.2973760000004,
+          "e2e_p50_ms": 3549.5505989999997,
+          "e2e_p95_ms": 7348.333036,
+          "e2e_p99_ms": 7749.507042000005,
+          "schedule_lag_p99_ms": 6395.599307000012,
+          "median_json_bytes": 371,
+          "errors": {
+            "TimeoutError: ": 848
+          }
+        }
+      ],
+      "startup_s": 0.29465037199999244,
+      "warm_ok": true
+    },
+    {
+      "name": "Arrow Flight ADBC via threadpool",
+      "package": "adbc-driver-flightsql",
+      "version": "1.12.0",
+      "pool_size": 64,
+      "native_async": false,
+      "status": "ok",
+      "loads": [
+        {
+          "offered_qps": 2000,
+          "duration_s": 3.0,
+          "requests": 6000,
+          "attempted": 2743,
+          "completed": 1028,
+          "query_failed": 1715,
+          "dropped": 3257,
+          "failed": 4972,
+          "success_rate": 0.17133333333333334,
+          "attempt_success_rate": 0.3747721472839956,
+          "achieved_qps": 119.42611845267636,
+          "actual_elapsed_s": 8.607832301000002,
+          "drain_exhausted": true,
+          "service_p50_ms": 492.02995699999974,
+          "service_p95_ms": 1027.736945000015,
+          "service_p99_ms": 1599.631512000002,
+          "e2e_p50_ms": 2533.2011570000077,
+          "e2e_p95_ms": 6721.627220999992,
+          "e2e_p99_ms": 7088.2624529999985,
+          "schedule_lag_p99_ms": 6279.864680999992,
+          "median_json_bytes": 371,
+          "errors": {
+            "TimeoutError: ": 1715
+          }
+        }
+      ],
+      "startup_s": 1.2508770480000067,
+      "warm_ok": true
+    },
+    {
+      "name": "mysql.connector.aio",
+      "package": "mysql-connector-python",
+      "version": "26.7.0",
+      "pool_size": 160,
+      "native_async": true,
+      "status": "failed",
+      "loads": [],
+      "error": "TypeError('cannot unpack non-iterable NoneType object')",
+      "close_error": "AttributeError(\"'MysqlConnectorAioAdapter' object has no attribute 'connections'\")"
+    }
+  ]
+}
