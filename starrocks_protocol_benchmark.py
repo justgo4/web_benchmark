@@ -58,7 +58,7 @@ def wait_mysql(timeout=180):
                 write_timeout=10,
             )
             with conn.cursor() as cur:
-                cur.execute("SELECT VERSION()")
+                cur.execute("SELECT current_version()")
                 version = cur.fetchone()[0]
             conn.close()
             return version
@@ -383,8 +383,8 @@ def main():
     version = wait_mysql()
     print("version:", version, flush=True)
 
-    wait_flight()
     load_s, qc_var = setup_data()
+    wait_flight()
     print(f"loaded {ROWS:,} rows in {load_s:.3f}s", flush=True)
     print("query_cache variable:", qc_var, flush=True)
 
