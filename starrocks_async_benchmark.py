@@ -77,6 +77,30 @@ def wait_mysql(timeout=180):
     raise RuntimeError(f"StarRocks MySQL port not ready: {last!r}")
 
 
+def wait_backend(timeout=180):
+    deadline = time.time() + timeout
+    last = None
+    while time.time() < deadline:
+        try:
+            conn = open_mysql()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("SHOW BACKENDS")
+                    rows = cur.fetchall()
+                    columns = [x[0] for x in cur.description]
+                items = [dict(zip(columns, row)) for row in rows]
+                alive = [x for x in items if str(x.get("Alive", "")).lower() == "true"]
+                if alive:
+                    return alive
+                last = items
+            finally:
+                conn.close()
+        except Exception as exc:
+            last = repr(exc)
+        time.sleep(2)
+    raise RuntimeError(f"StarRocks BE not ready: {last!r}")
+
+
 def open_mysql(database=None):
     return pymysql.connect(
         host=HOST,
@@ -730,6 +754,8 @@ def main():
     print("waiting for StarRocks...", flush=True)
     version = wait_mysql()
     print("StarRocks:", version, flush=True)
+    alive = wait_backend()
+    print(f"alive backends: {len(alive)}", flush=True)
     load_s, qc_var = setup_data()
     print(f"loaded {ROWS:,} rows in {load_s:.3f}s", flush=True)
     payload = asyncio.run(main_async(version, load_s, qc_var))
