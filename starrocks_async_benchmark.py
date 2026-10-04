@@ -624,7 +624,6 @@ async def main_async(version, load_s, qc_var):
         AiomysqlAdapter,
         MysqlConnectorAioAdapter,
         PyreqwestAdapter,
-        FlightThreadAdapter,
     ]
     random.Random(20261005).shuffle(adapters)
 
