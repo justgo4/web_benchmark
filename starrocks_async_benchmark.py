@@ -24,6 +24,7 @@ POOL_SIZE = int(os.getenv("SR_ASYNC_POOL", "160"))
 FLIGHT_POOL = int(os.getenv("SR_ASYNC_FLIGHT_POOL", "64"))
 WORKERS = int(os.getenv("SR_ASYNC_WORKERS", "512"))
 REQUEST_TIMEOUT = float(os.getenv("SR_ASYNC_TIMEOUT", "2.0"))
+DRAIN_LIMIT = float(os.getenv("SR_ASYNC_DRAIN_LIMIT", "5.0"))
 LOADS = []
 for item in os.getenv("SR_ASYNC_LOADS", "2000:3,4000:5,6000:3").split(","):
     rate, seconds = item.split(":")
@@ -471,18 +472,21 @@ async def run_open_loop(adapter, rate, seconds):
     sizes = []
     errors = {}
     completed = 0
+    attempted = 0
     start_gate = loop.time() + 0.25
+    hard_deadline = start_gate + seconds + DRAIN_LIMIT
     last_done = start_gate
     lock = asyncio.Lock()
 
     async def worker(worker_id):
-        nonlocal completed, last_done
+        nonlocal completed, attempted, last_done
         local_service = []
         local_e2e = []
         local_lag = []
         local_sizes = []
         local_errors = {}
         local_completed = 0
+        local_attempted = 0
         local_last_done = start_gate
 
         for i in range(worker_id, total, workers):
@@ -490,8 +494,13 @@ async def run_open_loop(adapter, rate, seconds):
             delay = target - loop.time()
             if delay > 0:
                 await asyncio.sleep(delay)
+
+            if loop.time() >= hard_deadline:
+                break
+
             begin = loop.time()
             local_lag.append(max(0.0, (begin - target) * 1000.0))
+            local_attempted += 1
             endpoint = i % 20
             try:
                 size = await asyncio.wait_for(
@@ -512,6 +521,7 @@ async def run_open_loop(adapter, rate, seconds):
 
         async with lock:
             completed += local_completed
+            attempted += local_attempted
             last_done = max(last_done, local_last_done)
             service.extend(local_service)
             end_to_end.extend(local_e2e)
@@ -522,16 +532,23 @@ async def run_open_loop(adapter, rate, seconds):
 
     await asyncio.gather(*(worker(i) for i in range(workers)))
     actual = max(seconds, last_done - start_gate)
+    dropped = total - attempted
+    query_failed = attempted - completed
     failed = total - completed
     return {
         "offered_qps": rate,
         "duration_s": seconds,
         "requests": total,
+        "attempted": attempted,
         "completed": completed,
+        "query_failed": query_failed,
+        "dropped": dropped,
         "failed": failed,
         "success_rate": completed / total if total else 0.0,
+        "attempt_success_rate": completed / attempted if attempted else 0.0,
         "achieved_qps": completed / actual if actual > 0 else 0.0,
         "actual_elapsed_s": actual,
+        "drain_exhausted": dropped > 0,
         "service_p50_ms": percentile(service, 50),
         "service_p95_ms": percentile(service, 95),
         "service_p99_ms": percentile(service, 99),
@@ -542,7 +559,6 @@ async def run_open_loop(adapter, rate, seconds):
         "median_json_bytes": int(statistics.median(sizes)) if sizes else 0,
         "errors": errors,
     }
-
 
 async def bench_adapter(adapter_cls):
     adapter = adapter_cls()
@@ -557,9 +573,9 @@ async def bench_adapter(adapter_cls):
     }
     try:
         started = time.perf_counter()
-        await adapter.start()
+        await asyncio.wait_for(adapter.start(), timeout=30.0)
         row["startup_s"] = time.perf_counter() - started
-        await warm_adapter(adapter)
+        await asyncio.wait_for(warm_adapter(adapter), timeout=15.0)
         row["warm_ok"] = True
 
         for rate, seconds in LOADS:
@@ -570,6 +586,13 @@ async def bench_adapter(adapter_cls):
             result = await run_open_loop(adapter, rate, seconds)
             row["loads"].append(result)
             print(json.dumps(result, indent=2), flush=True)
+            if result["drain_exhausted"]:
+                print(
+                    f"{adapter.name}: capacity exhausted at {rate:,} QPS; "
+                    "skipping higher loads",
+                    flush=True,
+                )
+                break
             await asyncio.sleep(1.0)
         row["status"] = "ok"
     except Exception as exc:
@@ -577,11 +600,10 @@ async def bench_adapter(adapter_cls):
         print(f"{adapter.name} failed: {exc!r}", flush=True)
     finally:
         try:
-            await adapter.close()
+            await asyncio.wait_for(adapter.close(), timeout=10.0)
         except Exception as exc:
             row["close_error"] = repr(exc)
     return row
-
 
 async def main_async(version, load_s, qc_var):
     invalidate_query_cache()
@@ -626,6 +648,7 @@ async def main_async(version, load_s, qc_var):
             "flight_pool_size": FLIGHT_POOL,
             "scheduler_workers": WORKERS,
             "request_timeout_s": REQUEST_TIMEOUT,
+            "drain_limit_s": DRAIN_LIMIT,
             "loads": LOADS,
             "endpoints": 20,
             "primary_target_qps": 4000,
