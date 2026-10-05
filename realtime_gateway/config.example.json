@@ -5,6 +5,7 @@
   "snapshot_rebuild_ms": 20,
   "refresh_concurrency": 12,
   "refresh_timeout_ms": 800,
+  "fe_failure_backoff_ms": 5000,
   "default_refresh_ms": 1000,
   "default_max_stale_ms": 10000,
   "default_max_rows": 1000,
