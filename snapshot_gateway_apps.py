@@ -236,3 +236,5 @@ elif KIND == "sanic":
 
 else:
     raise RuntimeError(f"unknown SNAPSHOT_APP={KIND}")
+
+# snapshot benchmark trigger
