@@ -16,7 +16,7 @@ HERE = ROOT / "realtime_gateway"
 SECRET = "ci-secret-0123456789abcdef"
 
 
-def wait_starrocks():
+def wait_mysql():
     deadline = time.time() + 180
     last = None
     while time.time() < deadline:
@@ -29,63 +29,68 @@ def wait_starrocks():
                 autocommit=True,
             )
             with conn.cursor() as cur:
-                cur.execute("SHOW BACKENDS")
-                rows = cur.fetchall()
-                names = [x[0] for x in cur.description]
+                cur.execute("SELECT 1")
             conn.close()
-            items = [dict(zip(names, row)) for row in rows]
-            if any(str(x.get("Alive", "")).lower() == "true" for x in items):
-                return
+            return
         except Exception as exc:
             last = exc
         time.sleep(2)
-    raise RuntimeError(f"StarRocks not ready: {last!r}")
+    raise RuntimeError(f"StarRocks MySQL not ready: {last!r}")
 
 
 def setup_data():
-    conn = pymysql.connect(
-        host="127.0.0.1",
-        port=9030,
-        user="root",
-        password="",
-        autocommit=True,
-    )
-    try:
-        with conn.cursor() as cur:
-            cur.execute("DROP DATABASE IF EXISTS gateway_ci FORCE")
-            cur.execute("CREATE DATABASE gateway_ci")
-            cur.execute("USE gateway_ci")
-            cur.execute(
-                """
-                CREATE TABLE metric_values (
-                    metric_id VARCHAR(16) NOT NULL,
-                    value BIGINT NOT NULL
-                )
-                DUPLICATE KEY(metric_id)
-                DISTRIBUTED BY HASH(metric_id) BUCKETS 4
-                PROPERTIES ("replication_num" = "1")
-                """
+    deadline = time.time() + 120
+    last = None
+
+    while time.time() < deadline:
+        try:
+            conn = pymysql.connect(
+                host="127.0.0.1",
+                port=9030,
+                user="root",
+                password="",
+                autocommit=True,
             )
-            values = ",".join(
-                f"('m{i:03d}',{i})" for i in range(100)
-            )
-            cur.execute("INSERT INTO metric_values VALUES " + values)
-    finally:
-        conn.close()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("DROP DATABASE IF EXISTS gateway_ci FORCE")
+                    cur.execute("CREATE DATABASE gateway_ci")
+                    cur.execute("USE gateway_ci")
+                    for name in ["metric_a", "metric_b", "metric_c"]:
+                        cur.execute(
+                            f"""
+                            CREATE TABLE {name} (
+                                value BIGINT NOT NULL
+                            )
+                            DUPLICATE KEY(value)
+                            DISTRIBUTED BY HASH(value) BUCKETS 1
+                            PROPERTIES ("replication_num" = "1")
+                            """
+                        )
+                    cur.execute("INSERT INTO metric_a VALUES (10)")
+                    cur.execute("INSERT INTO metric_b VALUES (20)")
+                    cur.execute("INSERT INTO metric_c VALUES (30)")
+                return
+            finally:
+                conn.close()
+        except Exception as exc:
+            last = exc
+            time.sleep(2)
+
+    raise RuntimeError(f"StarRocks BE not ready for tables: {last!r}")
 
 
 def write_runtime_config():
-    metrics = [f"m{i:03d}" for i in range(100)]
     config = {
         "users_file": "users.ci.json",
-        "mode": "batch",
-        "refresh_interval_ms": 500,
+        "metrics_file": "metrics.ci.json",
+        "scheduler_tick_ms": 20,
+        "snapshot_rebuild_ms": 20,
+        "refresh_concurrency": 2,
         "refresh_timeout_ms": 1500,
-        "max_stale_ms": 5000,
-        "serve_stale_on_error": True,
+        "default_refresh_ms": 500,
+        "default_max_stale_ms": 5000,
         "auth_window_seconds": 30,
-        "require_all_metrics": True,
-        "metric_id_column": "metric_id",
         "starrocks": {
             "hosts": ["127.0.0.1"],
             "port": 9030,
@@ -93,23 +98,39 @@ def write_runtime_config():
             "password_env": "STARROCKS_PASSWORD",
             "database": "gateway_ci",
             "pool_per_fe": 2
-        },
-        "batch_sql": (
-            "SELECT /*+ SET_VAR(enable_query_cache=true, pipeline_dop=1) */ "
-            "metric_id, value FROM metric_values ORDER BY metric_id"
-        ),
-        "metrics": metrics
+        }
+    }
+    metrics = {
+        "metrics": [
+            {
+                "id": "m000",
+                "sql": "SELECT value FROM metric_a ORDER BY value",
+                "refresh_ms": 500
+            },
+            {
+                "id": "m001",
+                "sql": "SELECT value FROM metric_b ORDER BY value",
+                "refresh_ms": 1000
+            },
+            {
+                "id": "m002",
+                "sql": "SELECT value FROM metric_c ORDER BY value",
+                "refresh_ms": 5000
+            }
+        ]
     }
     users = {
         "users": [
             {
                 "key": "ci-user",
                 "secret_env": "CI_DASHBOARD_SECRET",
-                "metrics": metrics[:50]
+                "metrics": ["m000", "m001"]
             }
         ]
     }
+
     (HERE / "config.ci.json").write_text(json.dumps(config), encoding="utf-8")
+    (HERE / "metrics.ci.json").write_text(json.dumps(metrics), encoding="utf-8")
     (HERE / "users.ci.json").write_text(json.dumps(users), encoding="utf-8")
 
 
@@ -123,7 +144,7 @@ def sign(path):
     return {
         "X-Api-Key": "ci-user",
         "X-Timestamp": ts,
-        "X-Signature": signature
+        "X-Signature": signature,
     }
 
 
@@ -155,7 +176,7 @@ def wait_gateway(proc):
 
 
 def main():
-    wait_starrocks()
+    wait_mysql()
     setup_data()
     write_runtime_config()
 
@@ -174,7 +195,7 @@ def main():
             "--host", "127.0.0.1",
             "--port", "8000",
             "--log-level", "warning",
-            "realtime_gateway.app:app"
+            "realtime_gateway.app:app",
         ],
         cwd=ROOT,
         env=env,
@@ -184,19 +205,20 @@ def main():
     try:
         wait_gateway(proc)
 
-        status, body = get("/api/m000")
-        assert status == 200
-        assert body["data"][0]["value"] == 0
+        _, body = get("/api/m000")
+        assert body["data"][0]["value"] == 10
 
-        status, body = get("/snapshot")
-        assert status == 200
-        assert len(body["data"]) == 50
-        assert "m000" in body["data"]
-        assert "m050" not in body["data"]
+        _, body = get("/api/m001")
+        assert body["data"][0]["value"] == 20
+
+        _, body = get("/snapshot")
+        assert set(body["data"]) == {"m000", "m001"}
+        assert body["data"]["m000"]["data"][0]["value"] == 10
+        assert body["data"]["m001"]["data"][0]["value"] == 20
 
         try:
-            get("/api/m050")
-            raise AssertionError("ACL should reject m050")
+            get("/api/m002")
+            raise AssertionError("ACL should reject m002")
         except urllib.error.HTTPError as exc:
             assert exc.code == 403
 
@@ -209,7 +231,7 @@ def main():
             autocommit=True,
         )
         with conn.cursor() as cur:
-            cur.execute("INSERT INTO metric_values VALUES ('m000',999)")
+            cur.execute("INSERT INTO metric_a VALUES (999)")
         conn.close()
 
         time.sleep(1.2)
@@ -217,7 +239,7 @@ def main():
         values = [row["value"] for row in body["data"]]
         assert 999 in values
 
-        print("realtime gateway smoke test: PASS", flush=True)
+        print("realtime gateway multi-table smoke test: PASS", flush=True)
     finally:
         try:
             os.killpg(proc.pid, signal.SIGTERM)
@@ -227,9 +249,14 @@ def main():
             proc.wait(timeout=5)
         except Exception:
             pass
-        for path in [HERE / "config.ci.json", HERE / "users.ci.json"]:
+
+        for name in [
+            "config.ci.json",
+            "metrics.ci.json",
+            "users.ci.json",
+        ]:
             try:
-                path.unlink()
+                (HERE / name).unlink()
             except Exception:
                 pass
 
