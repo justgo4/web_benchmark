@@ -20,6 +20,8 @@ on:
       - SNAPSHOT_GATEWAY_BENCHMARK.md
       - .github/workflows/snapshot_gateway.yml
       - results/snapshot_gateway_latest.json
+      - realtime_gateway/**
+      - .github/workflows/realtime_gateway.yml
       - results/**
 
 permissions:
