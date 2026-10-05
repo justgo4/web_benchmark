@@ -38,6 +38,7 @@ class GatewayApp:
         self.next_due = {}
         self.users = {}
         self.pools = []
+        self.pool_retry_at = []
         self.pool_cursor = 0
         self.snapshot = None
         self.scheduler_task = None
@@ -89,6 +90,7 @@ class GatewayApp:
                     connect_timeout=float(sr.get("connect_timeout_s", 2)),
                 )
             )
+            self.pool_retry_at.append(0.0)
 
         await self.initial_refresh()
 
@@ -234,29 +236,48 @@ class GatewayApp:
 
     async def query(self, sql, max_rows):
         timeout = float(self.config.get("refresh_timeout_ms", 800)) / 1000.0
+        backoff = float(self.config.get("fe_failure_backoff_ms", 5000)) / 1000.0
         errors = []
         total = len(self.pools)
+        loop = asyncio.get_running_loop()
 
         start_idx = self.pool_cursor
         self.pool_cursor = (self.pool_cursor + 1) % total
 
-        for offset in range(total):
-            idx = (start_idx + offset) % total
-            pool = self.pools[idx]
-            try:
-                async with pool.acquire() as conn:
-                    async def run():
-                        async with conn.cursor(aiomysql.DictCursor) as cur:
-                            await cur.execute(sql)
-                            rows = await cur.fetchmany(max_rows + 1)
-                            if len(rows) > max_rows:
-                                raise RuntimeError(
-                                    f"query exceeded max_rows={max_rows}"
-                                )
-                            return rows
+        order = [
+            (start_idx + offset) % total
+            for offset in range(total)
+        ]
+        available = [
+            idx
+            for idx in order
+            if self.pool_retry_at[idx] <= loop.time()
+        ]
+        if not available:
+            available = order
 
-                    return await asyncio.wait_for(run(), timeout=timeout)
+        for idx in available:
+            pool = self.pools[idx]
+
+            async def run():
+                async with pool.acquire() as conn:
+                    async with conn.cursor(aiomysql.DictCursor) as cur:
+                        await cur.execute(sql)
+                        rows = await cur.fetchmany(max_rows + 1)
+                        if len(rows) > max_rows:
+                            raise RuntimeError(
+                                f"query exceeded max_rows={max_rows}"
+                            )
+                        return rows
+
+            try:
+                rows = await asyncio.wait_for(run(), timeout=timeout)
+                self.pool_retry_at[idx] = 0.0
+                return rows
+            except asyncio.CancelledError:
+                raise
             except Exception as exc:
+                self.pool_retry_at[idx] = loop.time() + backoff
                 errors.append(
                     f"{idx}:{type(exc).__name__}:{str(exc)[:120]}"
                 )
