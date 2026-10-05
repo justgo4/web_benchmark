@@ -105,11 +105,18 @@ def write_runtime_config():
         "metrics": [
             {
                 "id": "m000",
+                "title": "Metric Zero",
+                "description": "Fast test metric",
+                "unit": "count",
+                "group": "test",
+                "fields": [{"name": "value", "type": "integer"}],
                 "sql": "SELECT value FROM metric_a ORDER BY value",
                 "refresh_ms": 500
             },
             {
                 "id": "m001",
+                "title": "Metric One",
+                "fields": [{"name": "value", "type": "integer"}],
                 "sql": "SELECT value FROM metric_b ORDER BY value",
                 "refresh_ms": 1000
             },
@@ -229,10 +236,20 @@ def main():
         _, body = get("/api/m001")
         assert body["data"][0]["value"] == 20
 
+        _, body = get("/catalog")
+        assert [x["id"] for x in body["metrics"]] == ["m000", "m001"]
+        assert body["metrics"][0]["endpoint"] == "/api/m000"
+        assert body["metrics"][0]["title"] == "Metric Zero"
+        assert body["snapshot_endpoint"] == "/snapshot"
+        assert "sql" not in body["metrics"][0]
+
         _, body = get("/snapshot")
         assert set(body["data"]) == {"m000", "m001"}
         assert body["data"]["m000"]["data"][0]["value"] == 10
         assert body["data"]["m001"]["data"][0]["value"] == 20
+
+        _, body = get("/catalog", "ci-all", ALL_SECRET)
+        assert {x["id"] for x in body["metrics"]} == {"m000", "m001", "m002"}
 
         try:
             get("/api/m002")
