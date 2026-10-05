@@ -136,6 +136,55 @@ After startup, future reads are phase-shifted across each refresh interval so 10
 
 A refresh failure affects only that metric. Other metrics continue updating, and the failing metric retains its own last-good result.
 
+## API discovery
+
+The caller does not need access to metrics.json and does not need to know any StarRocks table name.
+
+First call `GET /catalog` with the same HMAC headers. The response contains only the metrics that this API key is allowed to access:
+
+```json
+{
+  "code": 0,
+  "snapshot_endpoint": "/snapshot",
+  "metrics": [
+    {
+      "id": "orders_now",
+      "title": "实时订单数",
+      "description": "当前订单总量，来自实时计算结果表",
+      "unit": "笔",
+      "group": "交易",
+      "refresh_ms": 1000,
+      "endpoint": "/api/orders_now",
+      "fields": [
+        {"name": "order_count", "type": "integer", "description": "订单数量"},
+        {"name": "updated_at", "type": "datetime", "description": "源结果更新时间"}
+      ]
+    }
+  ]
+}
+```
+
+The catalog intentionally does **not** expose SQL, database names, table names, FE addresses, or any other StarRocks implementation detail.
+
+The public API contract is the metric `id`. For example, `orders_now` always maps to `/api/orders_now`. You may later change the underlying table or SQL without changing the caller's endpoint.
+
+Recommended caller flow:
+
+```
+login/configure key+secret
+        |
+        v
+GET /catalog
+        |
+        +-- discover allowed metrics and field definitions
+        |
+        +-- either call /api/{id}
+        |
+        +-- or preferably call /snapshot every second
+```
+
+Metric metadata in metrics.json supports `title`, `description`, `unit`, `group`, and `fields`. These are public API documentation fields; `sql` remains server-side only.
+
 ## API responses
 
 `GET /api/orders_now` returns one metric:
@@ -210,6 +259,7 @@ No Redis, SQL, filesystem read, or JSON serialization occurs on normal dashboard
 
 ## Health
 
+- `GET /catalog`: authenticated, permission-filtered metric/API directory.
 - `GET /healthz`: process is alive.
 - `GET /readyz`: shows uninitialized, stale, failed and inflight metrics.
 
