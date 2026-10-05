@@ -15,6 +15,11 @@ on:
       - STARROCKS_ASYNC_BENCHMARK.md
       - .github/workflows/starrocks_async.yml
       - results/starrocks_async_latest.json
+      - snapshot_gateway_apps.py
+      - snapshot_gateway_benchmark.py
+      - SNAPSHOT_GATEWAY_BENCHMARK.md
+      - .github/workflows/snapshot_gateway.yml
+      - results/snapshot_gateway_latest.json
       - results/**
 
 permissions:
