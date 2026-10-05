@@ -14,6 +14,7 @@ import pymysql
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 HERE = ROOT / "realtime_gateway"
 SECRET = "ci-secret-0123456789abcdef"
+ALL_SECRET = "ci-all-secret-0123456789abcdef"
 
 
 def wait_mysql():
@@ -92,7 +93,7 @@ def write_runtime_config():
         "default_max_stale_ms": 5000,
         "auth_window_seconds": 30,
         "starrocks": {
-            "hosts": ["127.0.0.1"],
+            "hosts": ["127.0.0.2", "127.0.0.1"],
             "port": 9030,
             "user": "root",
             "password_env": "STARROCKS_PASSWORD",
@@ -125,6 +126,11 @@ def write_runtime_config():
                 "key": "ci-user",
                 "secret_env": "CI_DASHBOARD_SECRET",
                 "metrics": ["m000", "m001"]
+            },
+            {
+                "key": "ci-all",
+                "secret_env": "CI_ALL_SECRET",
+                "metrics": "*"
             }
         ]
     }
@@ -134,27 +140,38 @@ def write_runtime_config():
     (HERE / "users.ci.json").write_text(json.dumps(users), encoding="utf-8")
 
 
-def sign(path):
+def sign(path, key="ci-user", secret=SECRET):
     ts = str(int(time.time()))
     signature = hmac.digest(
-        SECRET.encode(),
+        secret.encode(),
         ("GET\n" + path + "\n" + ts).encode(),
         "sha256",
     ).hex()
     return {
-        "X-Api-Key": "ci-user",
+        "X-Api-Key": key,
         "X-Timestamp": ts,
         "X-Signature": signature,
     }
 
 
-def get(path):
+def get(path, key="ci-user", secret=SECRET):
     req = urllib.request.Request(
         "http://127.0.0.1:8000" + path,
-        headers=sign(path),
+        headers=sign(path, key, secret),
     )
     with urllib.request.urlopen(req, timeout=3) as response:
         return response.status, json.loads(response.read())
+
+
+def get_json_allow_error(path):
+    try:
+        with urllib.request.urlopen(
+            "http://127.0.0.1:8000" + path,
+            timeout=3,
+        ) as response:
+            return response.status, json.loads(response.read())
+    except urllib.error.HTTPError as exc:
+        return exc.code, json.loads(exc.read())
 
 
 def wait_gateway(proc):
@@ -184,6 +201,7 @@ def main():
     env["GATEWAY_CONFIG"] = str(HERE / "config.ci.json")
     env["STARROCKS_PASSWORD"] = ""
     env["CI_DASHBOARD_SECRET"] = SECRET
+    env["CI_ALL_SECRET"] = ALL_SECRET
 
     proc = subprocess.Popen(
         [
@@ -241,12 +259,14 @@ def main():
         values = [row["value"] for row in body["data"]]
         assert 999 in values
 
-        # m002 is not visible to ci-user, so inspect readiness only for cadence.
-        with urllib.request.urlopen(
-            "http://127.0.0.1:8000/readyz",
-            timeout=3,
-        ) as response:
-            ready = json.loads(response.read())
+        # The 5-second metric must still show the initial value after 1.2s.
+        _, body = get("/api/m002", "ci-all", ALL_SECRET)
+        values = [row["value"] for row in body["data"]]
+        assert 333 not in values
+        assert 30 in values
+
+        status, ready = get_json_allow_error("/readyz")
+        assert status == 200
         assert ready["ready"] is True
 
         # Break metric_b source. Its last-good value must remain available while
@@ -273,21 +293,22 @@ def main():
         _, body = get("/api/m001")
         assert body["data"][0]["value"] == 20
 
-        with urllib.request.urlopen(
-            "http://127.0.0.1:8000/readyz",
-            timeout=3,
-        ) as response:
-            ready = json.loads(response.read())
+        status, ready = get_json_allow_error("/readyz")
+        assert status == 200
         assert "m001" in ready["failed"]
 
-        # After 5 seconds, the slow metric should finally refresh.
+        # After 5 seconds, m002 refreshes. m001 has been broken long enough to
+        # become stale, so readiness should intentionally turn 503.
         time.sleep(4.3)
-        with urllib.request.urlopen(
-            "http://127.0.0.1:8000/readyz",
-            timeout=3,
-        ) as response:
-            ready = json.loads(response.read())
+        _, body = get("/api/m002", "ci-all", ALL_SECRET)
+        values = [row["value"] for row in body["data"]]
+        assert 333 in values
+
+        status, ready = get_json_allow_error("/readyz")
+        assert status == 503
         assert ready["metrics"] == 3
+        assert "m001" in ready["stale"]
+        assert "m001" in ready["failed"]
 
         print("realtime gateway multi-table smoke test: PASS", flush=True)
     finally:
