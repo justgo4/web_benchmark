@@ -1,0 +1,49 @@
+name: Realtime gateway smoke test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - realtime_gateway/**
+      - .github/workflows/realtime_gateway.yml
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install gateway
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r realtime_gateway/requirements.txt pymysql
+
+      - name: Start StarRocks 4.1.1
+        run: |
+          docker pull starrocks/allin1-ubuntu:4.1.1
+          docker run -d \
+            --name starrocks \
+            -p 8030:8030 \
+            -p 8040:8040 \
+            -p 9030:9030 \
+            starrocks/allin1-ubuntu:4.1.1 \
+            bash -lc '
+              echo "query_cache_capacity = 536870912" >> /data/deploy/starrocks/be/conf/be.conf
+              exec ./entrypoint.sh
+            '
+
+      - name: End-to-end smoke test
+        run: python realtime_gateway/smoke_test.py
+
+      - name: Diagnostics
+        if: failure()
+        run: |
+          docker ps -a || true
+          docker logs starrocks || true
