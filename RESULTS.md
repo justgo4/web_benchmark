@@ -1,6 +1,6 @@
 # Benchmark Results
 
-Generated: 2026-09-29T23:38:10.870888+00:00
+Generated: 2026-10-05T15:44:02.975636+00:00
 
 ## Method
 
@@ -16,26 +16,26 @@ Generated: 2026-09-29T23:38:10.870888+00:00
 
 | Rank | Stack | Type | Version | Python | Median RPS | Range | p50 | p90 | p99 |
 |---:|---|---|---|---|---:|---:|---:|---:|---:|
-| 1 | FastPySGI WSGI | server ceiling | 0.6 | 3.13 | 74,603 | 64,889–80,049 | 1.63ms | 1.92ms | 2.10ms |
-| 2 | Dreaming Electric Sheep | framework | 1.2.1 | 3.13 | 59,529 | 59,152–59,683 | 2.12ms | 2.33ms | 2.79ms |
-| 3 | Granian raw RSGI | server ceiling | 2.8.3 | 3.13 | 37,256 | 37,250–37,471 | 3.52ms | 4.09ms | 4.56ms |
-| 4 | Uvicorn raw ASGI | server ceiling | 0.54.0 | 3.13 | 35,950 | 35,669–36,062 | 3.18ms | 4.02ms | 6.34ms |
-| 5 | Jero + Granian | framework | 0.1.3 | 3.13 | 25,471 | 25,105–25,711 | 5.10ms | 5.68ms | 6.58ms |
-| 6 | Sanic | framework | 25.12.1 | 3.13 | 18,403 | 18,257–18,628 | 5.64ms | 11.02ms | 134.26ms |
-| 7 | BustAPI | framework | 0.15.0 | 3.13 | 14,612 | 14,575–14,637 | 10.20ms | 26.87ms | 52.66ms |
-| 8 | BlackSheep + Granian | framework | 2.6.3 | 3.13 | 13,859 | 13,768–13,907 | 9.18ms | 10.38ms | 10.90ms |
-| 9 | Starlette + Granian | framework | 1.7.0 | 3.13 | 12,910 | 12,764–13,079 | 9.89ms | 11.44ms | 11.89ms |
-| 10 | Emmett + Granian | framework | 2.8.1 | 3.13 | 11,715 | 11,678–11,727 | 11.12ms | 11.45ms | 11.74ms |
-| 11 | aiohttp | framework | 3.14.3 | 3.13 | 10,731 | 10,731–10,966 | 11.96ms | 14.16ms | 14.43ms |
-| 12 | Falcon + Granian | framework | 4.3.1 | 3.13 | 10,004 | 9,909–10,178 | 12.74ms | 13.80ms | 14.29ms |
-| 13 | Robyn | framework | 0.88.0 | 3.13 | 8,302 | 8,000–8,372 | 13.66ms | 20.00ms | 24.83ms |
-| 14 | Litestar + Granian | framework | 2.24.0 | 3.13 | 7,940 | 7,895–8,094 | 16.19ms | 17.41ms | 17.87ms |
-| 15 | FastAPI + Granian | framework | 0.142.1 | 3.13 | 6,187 | 6,034–6,229 | 20.82ms | 24.49ms | 25.12ms |
+| 1 | FastPySGI WSGI | server ceiling | 0.6 | 3.13 | 71,980 | 58,687–77,771 | 1.65ms | 2.01ms | 2.25ms |
+| 2 | Dreaming Electric Sheep | framework | 1.2.1 | 3.13 | 56,579 | 55,395–57,352 | 2.18ms | 2.63ms | 3.41ms |
+| 3 | Granian raw RSGI | server ceiling | 2.8.4 | 3.13 | 37,310 | 36,842–37,365 | 3.49ms | 4.04ms | 4.41ms |
+| 4 | Jero + Granian | framework | 0.1.3 | 3.13 | 25,400 | 25,303–25,749 | 5.14ms | 5.74ms | 6.26ms |
+| 5 | Uvicorn raw ASGI | server ceiling | 0.54.0 | 3.13 | 19,355 | 19,197–19,962 | 7.05ms | 7.63ms | 119.18ms |
+| 6 | BustAPI | framework | 0.15.0 | 3.13 | 14,375 | 14,283–14,397 | 10.27ms | 29.49ms | 57.46ms |
+| 7 | BlackSheep + Granian | framework | 2.6.3 | 3.13 | 13,858 | 13,656–14,042 | 9.23ms | 10.38ms | 11.03ms |
+| 8 | Starlette + Granian | framework | 1.7.0 | 3.13 | 12,506 | 12,490–12,568 | 10.19ms | 11.39ms | 12.05ms |
+| 9 | Emmett + Granian | framework | 2.8.1 | 3.13 | 11,631 | 11,535–11,698 | 11.17ms | 11.61ms | 11.97ms |
+| 10 | aiohttp | framework | 3.14.3 | 3.13 | 11,269 | 10,654–11,502 | 10.87ms | 14.32ms | 15.52ms |
+| 11 | Sanic | framework | 25.12.1 | 3.13 | 10,483 | 10,406–11,027 | 12.14ms | 14.47ms | 209.07ms |
+| 12 | Falcon + Granian | framework | 4.4.0 | 3.13 | 9,817 | 9,680–9,915 | 13.04ms | 14.11ms | 14.68ms |
+| 13 | Litestar + Granian | framework | 2.24.0 | 3.13 | 7,869 | 7,670–8,167 | 15.99ms | 17.73ms | 18.29ms |
+| 14 | Robyn | framework | 0.88.0 | 3.13 | 7,743 | 7,714–7,936 | 14.70ms | 20.81ms | 26.60ms |
+| 15 | FastAPI + Granian | framework | 0.142.2 | 3.13 | 6,058 | 5,865–6,274 | 21.93ms | 24.97ms | 25.58ms |
 
 ## Automated observations
 
-- Fastest successful **common-runtime framework** in this run: **Dreaming Electric Sheep** at ~59,529 median RPS.
-- Highest raw server ceiling measured: **FastPySGI WSGI** at ~74,603 median RPS.
+- Fastest successful **common-runtime framework** in this run: **Dreaming Electric Sheep** at ~56,579 median RPS.
+- Highest raw server ceiling measured: **FastPySGI WSGI** at ~71,980 median RPS.
 - For the StarRocks gateway decision, this JSON hot-path test is a ceiling test. A proxy workload with connection pooling and an upstream HTTP hop is more representative and should be considered before migrating frameworks.
 
 ## Failed / incompatible cases

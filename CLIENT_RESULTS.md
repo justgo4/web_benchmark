@@ -15,12 +15,12 @@ This benchmark targets the StarRocks-gateway use case: a Python API process maki
 
 | Rank | Client | Version | Median RPS | Range | p50 | p90 | p99 | Errors |
 |---:|---|---|---:|---:|---:|---:|---:|---:|
-| 1 | pyreqwest | 0.13.0 | 9,662 | 9,634–9,751 | 13.170ms | 15.925ms | 16.382ms | 0 |
-| 2 | pyqwest | 0.11.0 | 8,754 | 8,722–8,816 | 13.408ms | 20.892ms | 27.163ms | 0 |
-| 3 | aiohttp | 3.14.3 | 7,611 | 6,424–7,941 | 15.338ms | 20.831ms | 22.119ms | 0 |
-| 4 | httpx | 0.28.1 | 255 | 255–255 | 478.228ms | 1208.467ms | 3223.360ms | 0 |
+| 1 | pyreqwest | 0.14.0 | 10,032 | 9,971–10,118 | 12.495ms | 15.517ms | 16.255ms | 0 |
+| 2 | pyqwest | 0.11.0 | 8,740 | 8,733–8,794 | 14.214ms | 21.491ms | 27.930ms | 0 |
+| 3 | aiohttp | 3.14.3 | 6,982 | 6,551–7,420 | 22.473ms | 23.460ms | 25.303ms | 0 |
+| 4 | httpx | 0.28.1 | 256 | 255–258 | 520.471ms | 1265.936ms | 1919.480ms | 0 |
 
 ## Automated observation
 
-- Fastest client in this run: **pyreqwest** at ~9,662 median RPS.
+- Fastest client in this run: **pyreqwest** at ~10,032 median RPS.
 - For the actual StarRocks API gateway, upstream SQL latency will usually dominate this microbenchmark; the main value here is identifying avoidable HTTP-client overhead and connection-pool behavior.

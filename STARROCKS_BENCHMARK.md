@@ -11,21 +11,21 @@ The mock upstream is FastPySGI and returns prebuilt StarRocks-style NDJSON. The 
 
 | Rank | Stack | Median RPS | Range | p50 | p90 | p99 | non-2xx |
 |---:|---|---:|---:|---:|---:|---:|---:|
-| 1 | Sanic | 2,248 | 2,210-2,287 | 56.59ms | 60.96ms | 125.85ms | 0 |
-| 2 | Uvicorn raw ASGI | 2,225 | 2,206-2,244 | 56.28ms | 64.07ms | 204.50ms | 0 |
-| 3 | Dreaming Electric Sheep | 2,045 | 2,039-2,051 | 61.89ms | 63.75ms | 64.24ms | 0 |
-| 4 | Jero + Granian | 2,024 | 2,005-2,042 | 62.97ms | 64.96ms | 73.86ms | 0 |
-| 5 | Granian raw RSGI | 1,940 | 1,926-1,953 | 65.22ms | 67.34ms | 69.02ms | 0 |
-| 6 | aiohttp | 1,902 | 1,870-1,934 | 65.24ms | 69.45ms | 73.25ms | 0 |
-| 7 | FastPySGI | 1,877 | 1,875-1,878 | 49.42ms | 63.61ms | 1.35s | 0 |
-| 8 | BlackSheep + Granian | 1,825 | 1,824-1,825 | 69.74ms | 71.19ms | 73.44ms | 0 |
-| 9 | Litestar + Granian | 1,814 | 1,805-1,823 | 69.93ms | 71.64ms | 77.50ms | 0 |
-| 10 | Starlette + Granian | 1,809 | 1,796-1,822 | 69.66ms | 71.57ms | 74.09ms | 0 |
-| 11 | Emmett + Granian | 1,808 | 1,778-1,838 | 70.82ms | 72.78ms | 92.49ms | 0 |
-| 12 | Falcon + Granian | 1,735 | 1,730-1,739 | 73.25ms | 75.96ms | 78.62ms | 0 |
-| 13 | Robyn | 1,660 | 1,660-1,661 | 73.08ms | 87.45ms | 104.33ms | 0 |
-| 14 | BustAPI | 1,503 | 1,492-1,514 | 83.60ms | 90.79ms | 99.68ms | 0 |
-| 15 | FastAPI + Granian | 874 | 866-882 | 143.49ms | 146.85ms | 151.90ms | 0 |
+| 1 | Sanic | 2,327 | 2,287-2,366 | 52.94ms | 55.56ms | 250.19ms | 0 |
+| 2 | Uvicorn raw ASGI | 2,236 | 2,214-2,257 | 56.78ms | 63.10ms | 573.59ms | 0 |
+| 3 | Dreaming Electric Sheep | 2,029 | 2,008-2,049 | 61.92ms | 63.62ms | 65.48ms | 0 |
+| 4 | Jero + Granian | 2,018 | 2,001-2,036 | 62.58ms | 64.81ms | 66.40ms | 0 |
+| 5 | Granian raw RSGI | 1,936 | 1,929-1,944 | 65.61ms | 67.43ms | 69.03ms | 0 |
+| 6 | aiohttp | 1,876 | 1,872-1,880 | 67.71ms | 70.46ms | 73.31ms | 0 |
+| 7 | FastPySGI | 1,856 | 1,846-1,866 | 50.20ms | 63.81ms | 1.33s | 0 |
+| 8 | Litestar + Granian | 1,822 | 1,818-1,826 | 69.65ms | 71.42ms | 73.67ms | 0 |
+| 9 | BlackSheep + Granian | 1,815 | 1,810-1,821 | 69.90ms | 71.55ms | 73.93ms | 0 |
+| 10 | Emmett + Granian | 1,811 | 1,804-1,818 | 70.08ms | 71.82ms | 73.58ms | 0 |
+| 11 | Starlette + Granian | 1,807 | 1,797-1,817 | 69.85ms | 71.76ms | 73.52ms | 0 |
+| 12 | Falcon + Granian | 1,737 | 1,724-1,749 | 72.73ms | 74.99ms | 78.73ms | 0 |
+| 13 | Robyn | 1,635 | 1,628-1,643 | 74.00ms | 88.30ms | 101.96ms | 0 |
+| 14 | BustAPI | 1,498 | 1,486-1,510 | 83.67ms | 90.71ms | 97.74ms | 0 |
+| 15 | FastAPI + Granian | 874 | 863-886 | 142.59ms | 146.21ms | 154.03ms | 0 |
 
 Failed/incompatible: TurboAPI (server not ready: process exited with -4)
 
@@ -33,21 +33,21 @@ Failed/incompatible: TurboAPI (server not ready: process exited with -4)
 
 | Rank | Stack | Median RPS | Range | p50 | p90 | p99 | non-2xx |
 |---:|---|---:|---:|---:|---:|---:|---:|
-| 1 | Sanic | 2,422 | 2,386-2,458 | 49.90ms | 58.76ms | 71.13ms | 0 |
-| 2 | Uvicorn raw ASGI | 2,375 | 2,337-2,413 | 52.20ms | 63.91ms | 162.24ms | 0 |
-| 3 | Jero + Granian | 2,042 | 2,028-2,057 | 61.61ms | 66.49ms | 69.65ms | 0 |
-| 4 | Granian raw RSGI | 1,971 | 1,943-1,999 | 63.70ms | 67.86ms | 71.62ms | 0 |
-| 5 | aiohttp | 1,929 | 1,919-1,938 | 67.08ms | 69.31ms | 74.72ms | 0 |
-| 6 | BlackSheep + Granian | 1,863 | 1,860-1,866 | 67.99ms | 72.59ms | 78.76ms | 0 |
-| 7 | Litestar + Granian | 1,862 | 1,859-1,866 | 68.28ms | 73.08ms | 78.24ms | 0 |
-| 8 | Emmett + Granian | 1,857 | 1,851-1,862 | 67.54ms | 72.56ms | 83.10ms | 0 |
-| 9 | Starlette + Granian | 1,811 | 1,810-1,813 | 69.79ms | 75.29ms | 90.67ms | 0 |
-| 10 | Falcon + Granian | 1,750 | 1,736-1,763 | 71.56ms | 77.37ms | 92.11ms | 0 |
-| 11 | Robyn | 1,708 | 1,703-1,714 | 71.36ms | 85.19ms | 102.55ms | 0 |
-| 12 | BustAPI | 1,499 | 1,494-1,503 | 84.26ms | 92.15ms | 101.16ms | 0 |
-| 13 | FastAPI + Granian | 882 | 868-896 | 140.88ms | 147.31ms | 162.25ms | 0 |
-| 14 | Dreaming Electric Sheep | 156 | 144-169 | 727.83ms | 1.12s | 1.41s | 0 |
-| 15 | FastPySGI | 155 | 143-167 | 148.73ms | 201.23ms | 1.20s | 0 |
+| 1 | Sanic | 2,308 | 2,292-2,324 | 54.16ms | 57.44ms | 111.14ms | 0 |
+| 2 | Uvicorn raw ASGI | 2,209 | 2,191-2,228 | 56.75ms | 60.70ms | 85.33ms | 0 |
+| 3 | Jero + Granian | 2,034 | 2,029-2,038 | 62.28ms | 66.56ms | 69.61ms | 0 |
+| 4 | Granian raw RSGI | 1,966 | 1,953-1,979 | 64.48ms | 68.42ms | 72.29ms | 0 |
+| 5 | aiohttp | 1,934 | 1,910-1,959 | 64.28ms | 68.86ms | 78.47ms | 0 |
+| 6 | Emmett + Granian | 1,869 | 1,862-1,875 | 67.61ms | 72.76ms | 76.55ms | 0 |
+| 7 | Starlette + Granian | 1,827 | 1,823-1,831 | 69.74ms | 74.00ms | 77.51ms | 0 |
+| 8 | Litestar + Granian | 1,826 | 1,824-1,828 | 69.57ms | 74.26ms | 80.87ms | 0 |
+| 9 | BlackSheep + Granian | 1,823 | 1,818-1,829 | 69.68ms | 73.48ms | 76.81ms | 0 |
+| 10 | Falcon + Granian | 1,737 | 1,731-1,744 | 72.67ms | 79.50ms | 85.33ms | 0 |
+| 11 | Robyn | 1,714 | 1,703-1,724 | 71.82ms | 86.53ms | 106.79ms | 0 |
+| 12 | BustAPI | 1,475 | 1,464-1,485 | 84.40ms | 93.35ms | 124.85ms | 0 |
+| 13 | FastAPI + Granian | 862 | 854-870 | 145.08ms | 152.07ms | 226.72ms | 0 |
+| 14 | Dreaming Electric Sheep | 156 | 144-168 | 728.45ms | 730.75ms | 869.84ms | 0 |
+| 15 | FastPySGI | 154 | 143-166 | 154.59ms | 201.69ms | 1.18s | 0 |
 
 Failed/incompatible: TurboAPI (server not ready: process exited with -4)
 
@@ -55,21 +55,21 @@ Failed/incompatible: TurboAPI (server not ready: process exited with -4)
 
 | Rank | Stack | Median RPS | Range | p50 | p90 | p99 | non-2xx |
 |---:|---|---:|---:|---:|---:|---:|---:|
-| 1 | Jero + Granian | 2,017 | 2,016-2,018 | 63.78ms | 67.35ms | 70.70ms | 0 |
-| 2 | Granian raw RSGI | 1,921 | 1,916-1,926 | 66.77ms | 71.45ms | 73.79ms | 0 |
-| 3 | Sanic | 1,882 | 1,864-1,900 | 65.85ms | 77.76ms | 94.63ms | 0 |
-| 4 | aiohttp | 1,860 | 1,831-1,889 | 67.97ms | 75.94ms | 112.50ms | 0 |
-| 5 | Uvicorn raw ASGI | 1,851 | 1,849-1,852 | 68.65ms | 77.26ms | 96.95ms | 0 |
-| 6 | Litestar + Granian | 1,822 | 1,801-1,842 | 71.61ms | 76.35ms | 85.17ms | 0 |
-| 7 | BlackSheep + Granian | 1,817 | 1,811-1,824 | 69.93ms | 74.90ms | 84.75ms | 0 |
-| 8 | Emmett + Granian | 1,811 | 1,807-1,814 | 71.18ms | 76.11ms | 84.40ms | 0 |
-| 9 | Starlette + Granian | 1,770 | 1,748-1,791 | 71.46ms | 75.92ms | 84.79ms | 0 |
-| 10 | Robyn | 1,758 | 1,750-1,766 | 76.73ms | 85.50ms | 98.04ms | 0 |
-| 11 | Falcon + Granian | 1,744 | 1,729-1,759 | 73.08ms | 77.55ms | 86.80ms | 0 |
-| 12 | BustAPI | 1,457 | 1,454-1,459 | 86.82ms | 98.30ms | 113.65ms | 0 |
-| 13 | FastAPI + Granian | 890 | 873-906 | 139.54ms | 147.90ms | 155.73ms | 0 |
-| 14 | FastPySGI | 28 | 16-40 | 270.02ms | 498.98ms | 1.60s | 0 |
-| 15 | Dreaming Electric Sheep | 28 | 16-40 | 0.00us | 0.00us | 0.00us | 0 |
+| 1 | Jero + Granian | 1,985 | 1,978-1,991 | 64.72ms | 68.85ms | 78.32ms | 0 |
+| 2 | Granian raw RSGI | 1,886 | 1,878-1,894 | 68.09ms | 71.25ms | 73.50ms | 0 |
+| 3 | Emmett + Granian | 1,801 | 1,789-1,813 | 71.37ms | 75.68ms | 83.57ms | 0 |
+| 4 | aiohttp | 1,800 | 1,759-1,841 | 71.60ms | 78.50ms | 80.36ms | 0 |
+| 5 | Sanic | 1,794 | 1,785-1,803 | 68.76ms | 71.18ms | 73.12ms | 0 |
+| 6 | BlackSheep + Granian | 1,784 | 1,771-1,796 | 71.66ms | 75.89ms | 80.61ms | 0 |
+| 7 | Litestar + Granian | 1,750 | 1,742-1,758 | 73.55ms | 78.45ms | 83.46ms | 0 |
+| 8 | Uvicorn raw ASGI | 1,729 | 1,727-1,731 | 72.86ms | 75.66ms | 79.06ms | 0 |
+| 9 | Starlette + Granian | 1,726 | 1,715-1,738 | 73.84ms | 78.21ms | 87.93ms | 0 |
+| 10 | Robyn | 1,705 | 1,697-1,714 | 76.86ms | 87.52ms | 108.18ms | 0 |
+| 11 | Falcon + Granian | 1,705 | 1,685-1,725 | 76.19ms | 81.61ms | 94.04ms | 0 |
+| 12 | BustAPI | 1,431 | 1,419-1,443 | 88.31ms | 100.57ms | 114.52ms | 0 |
+| 13 | FastAPI + Granian | 864 | 859-870 | 143.31ms | 157.59ms | 176.44ms | 0 |
+| 14 | Dreaming Electric Sheep | 28 | 16-40 | 1.33s | 1.87s | 2.00s | 0 |
+| 15 | FastPySGI | 28 | 16-40 | 166.91ms | 209.55ms | 376.95ms | 0 |
 
 Failed/incompatible: TurboAPI (server not ready: process exited with -4)
 
@@ -77,21 +77,21 @@ Failed/incompatible: TurboAPI (server not ready: process exited with -4)
 
 | Rank | Stack | Median RPS | Range | p50 | p90 | p99 | non-2xx |
 |---:|---|---:|---:|---:|---:|---:|---:|
-| 1 | Jero + Granian | 367 | 357-377 | 332.06ms | 334.71ms | 376.03ms | 0 |
-| 2 | Sanic | 359 | 355-363 | 228.07ms | 352.02ms | 1.57s | 0 |
-| 3 | Litestar + Granian | 358 | 347-369 | 337.73ms | 343.72ms | 389.91ms | 0 |
-| 4 | Uvicorn raw ASGI | 335 | 323-347 | 243.98ms | 351.57ms | 1.44s | 0 |
-| 5 | Granian raw RSGI | 331 | 319-342 | 365.28ms | 370.20ms | 421.04ms | 0 |
-| 6 | aiohttp | 321 | 308-334 | 372.29ms | 378.10ms | 431.79ms | 0 |
-| 7 | Emmett + Granian | 320 | 309-332 | 376.43ms | 382.04ms | 436.03ms | 0 |
-| 8 | Starlette + Granian | 320 | 307-332 | 376.61ms | 400.33ms | 695.30ms | 0 |
-| 9 | BlackSheep + Granian | 319 | 308-330 | 376.02ms | 391.36ms | 433.18ms | 0 |
-| 10 | Falcon + Granian | 316 | 303-329 | 378.95ms | 385.69ms | 437.12ms | 0 |
-| 11 | Robyn | 307 | 303-311 | 387.63ms | 453.23ms | 642.29ms | 0 |
-| 12 | BustAPI | 299 | 289-308 | 407.43ms | 466.72ms | 738.42ms | 0 |
-| 13 | FastAPI + Granian | 111 | 99-124 | 967.46ms | 986.86ms | 1.21s | 0 |
-| 14 | Dreaming Electric Sheep | 109 | 97-120 | 996.25ms | 1.01s | 1.20s | 0 |
-| 15 | FastPySGI | 104 | 92-116 | 177.28ms | 240.03ms | 1.35s | 0 |
+| 1 | Jero + Granian | 370 | 358-382 | 330.02ms | 334.66ms | 602.02ms | 0 |
+| 2 | Sanic | 362 | 356-368 | 231.27ms | 299.03ms | 1.40s | 0 |
+| 3 | Litestar + Granian | 356 | 345-368 | 339.33ms | 346.07ms | 388.31ms | 0 |
+| 4 | Uvicorn raw ASGI | 331 | 318-344 | 232.81ms | 307.95ms | 1.45s | 0 |
+| 5 | Granian raw RSGI | 327 | 316-337 | 367.17ms | 380.10ms | 703.16ms | 0 |
+| 6 | aiohttp | 322 | 310-333 | 372.19ms | 384.84ms | 437.64ms | 0 |
+| 7 | Emmett + Granian | 319 | 309-330 | 377.58ms | 391.86ms | 692.63ms | 0 |
+| 8 | Starlette + Granian | 319 | 308-330 | 377.68ms | 385.52ms | 432.04ms | 0 |
+| 9 | BlackSheep + Granian | 318 | 307-330 | 377.08ms | 383.74ms | 435.49ms | 0 |
+| 10 | Falcon + Granian | 314 | 299-328 | 387.70ms | 407.28ms | 704.54ms | 0 |
+| 11 | Robyn | 310 | 309-310 | 380.63ms | 444.54ms | 608.79ms | 0 |
+| 12 | BustAPI | 294 | 281-308 | 404.15ms | 436.28ms | 502.63ms | 0 |
+| 13 | FastAPI + Granian | 112 | 101-123 | 969.36ms | 979.54ms | 1.19s | 0 |
+| 14 | Dreaming Electric Sheep | 109 | 97-121 | 998.33ms | 1.68s | 1.96s | 0 |
+| 15 | FastPySGI | 102 | 90-114 | 179.15ms | 238.69ms | 1.37s | 0 |
 
 Failed/incompatible: TurboAPI (server not ready: process exited with -4)
 
@@ -101,21 +101,21 @@ Overall score = geometric mean of median RPS across all four scenarios. Only sta
 
 | Rank | Stack | Geometric-mean RPS |
 |---:|---|---:|
-| 1 | Sanic | 1,385 |
-| 2 | Uvicorn raw ASGI | 1,346 |
-| 3 | Jero + Granian | 1,323 |
-| 4 | Granian raw RSGI | 1,248 |
-| 5 | Litestar + Granian | 1,218 |
-| 6 | aiohttp | 1,216 |
-| 7 | BlackSheep + Granian | 1,185 |
-| 8 | Emmett + Granian | 1,181 |
-| 9 | Starlette + Granian | 1,167 |
-| 10 | Falcon + Granian | 1,137 |
-| 11 | Robyn | 1,113 |
-| 12 | BustAPI | 995 |
-| 13 | FastAPI + Granian | 526 |
-| 14 | Dreaming Electric Sheep | 177 |
-| 15 | FastPySGI | 171 |
+| 1 | Sanic | 1,367 |
+| 2 | Jero + Granian | 1,318 |
+| 3 | Uvicorn raw ASGI | 1,297 |
+| 4 | Granian raw RSGI | 1,238 |
+| 5 | aiohttp | 1,204 |
+| 6 | Litestar + Granian | 1,200 |
+| 7 | Emmett + Granian | 1,181 |
+| 8 | BlackSheep + Granian | 1,171 |
+| 9 | Starlette + Granian | 1,161 |
+| 10 | Falcon + Granian | 1,127 |
+| 11 | Robyn | 1,103 |
+| 12 | BustAPI | 982 |
+| 13 | FastAPI + Granian | 520 |
+| 14 | Dreaming Electric Sheep | 176 |
+| 15 | FastPySGI | 169 |
 
 Overall winner in this run: Sanic.
 
