@@ -130,7 +130,7 @@ The gateway fetches at most `max_rows + 1` rows and rejects the refresh if the c
 
 The scheduler uses `refresh_concurrency` as a hard cap. With the default 12, no more than 12 metric reads are active at once.
 
-Pools are created with lazy connections. A FE that is down when the gateway starts does not prevent startup; that FE is retried naturally on later pool acquisition, while other FE hosts continue serving refresh queries.
+Pools are created with lazy connections. A FE that is down when the gateway starts does not prevent startup. Connection acquisition and SQL execution are both bounded by refresh_timeout_ms. Failed FE pools are skipped for fe_failure_backoff_ms before being retried, while healthy FE hosts continue serving refresh queries.
 
 After startup, future reads are phase-shifted across each refresh interval so 100 one-second metrics are not intentionally fired at the same millisecond.
 
