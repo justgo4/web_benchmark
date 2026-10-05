@@ -2,24 +2,57 @@
   "metrics": [
     {
       "id": "orders_now",
+      "title": "实时订单数",
+      "description": "当前订单总量，来自实时计算结果表",
+      "unit": "笔",
+      "group": "交易",
+      "fields": [
+        {"name": "order_count", "type": "integer", "description": "订单数量"},
+        {"name": "updated_at", "type": "datetime", "description": "源结果更新时间"}
+      ],
       "sql": "SELECT /*+ SET_VAR(enable_query_cache=true, pipeline_dop=1) */ order_count, updated_at FROM dashboard.rt_orders_result ORDER BY updated_at DESC LIMIT 1",
       "refresh_ms": 1000,
       "max_stale_ms": 5000
     },
     {
       "id": "gmv_now",
+      "title": "实时GMV",
+      "description": "当前成交金额",
+      "unit": "元",
+      "group": "交易",
+      "fields": [
+        {"name": "gmv", "type": "number", "description": "成交金额"},
+        {"name": "updated_at", "type": "datetime", "description": "源结果更新时间"}
+      ],
       "sql": "SELECT /*+ SET_VAR(enable_query_cache=true, pipeline_dop=1) */ gmv, updated_at FROM dashboard.rt_gmv_result ORDER BY updated_at DESC LIMIT 1",
       "refresh_ms": 1000,
       "max_stale_ms": 5000
     },
     {
       "id": "inventory_now",
+      "title": "当前库存",
+      "description": "库存SKU数量及库存金额",
+      "unit": "",
+      "group": "库存",
+      "fields": [
+        {"name": "sku_count", "type": "integer", "description": "SKU数量"},
+        {"name": "stock_value", "type": "number", "description": "库存金额"},
+        {"name": "updated_at", "type": "datetime", "description": "源结果更新时间"}
+      ],
       "sql": "SELECT /*+ SET_VAR(enable_query_cache=true, pipeline_dop=1) */ sku_count, stock_value, updated_at FROM dashboard.inventory_result ORDER BY updated_at DESC LIMIT 1",
       "refresh_ms": 5000,
       "max_stale_ms": 20000
     },
     {
       "id": "monthly_sales",
+      "title": "月销售额",
+      "description": "最近12个月离线汇总销售额",
+      "unit": "元",
+      "group": "销售",
+      "fields": [
+        {"name": "month", "type": "string", "description": "月份"},
+        {"name": "sales", "type": "number", "description": "月销售额"}
+      ],
       "sql": "SELECT /*+ SET_VAR(enable_query_cache=true, pipeline_dop=1) */ month, sales FROM dashboard.offline_monthly_sales ORDER BY month DESC LIMIT 12",
       "refresh_ms": 60000,
       "max_stale_ms": 300000
