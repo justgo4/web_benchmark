@@ -173,6 +173,11 @@ class GatewayApp:
 
             specs[metric_id] = {
                 "id": metric_id,
+                "title": str(row.get("title", metric_id)),
+                "description": str(row.get("description", "")),
+                "unit": str(row.get("unit", "")),
+                "group": str(row.get("group", "")),
+                "fields": row.get("fields", []),
                 "sql": sql,
                 "refresh_ms": refresh_ms,
                 "max_stale_ms": max_stale_ms,
@@ -377,11 +382,28 @@ class GatewayApp:
             )
 
         user_bodies = {}
+        catalog_bodies = {}
         for key, (_secret, mask) in self.users.items():
             visible = {}
+            catalog = []
             for idx, metric_id in enumerate(self.metric_ids):
-                if mask & (1 << idx):
-                    visible[metric_id] = metric_values[metric_id]
+                if not (mask & (1 << idx)):
+                    continue
+
+                visible[metric_id] = metric_values[metric_id]
+                spec = self.metric_specs[metric_id]
+                catalog.append(
+                    {
+                        "id": metric_id,
+                        "title": spec["title"],
+                        "description": spec["description"],
+                        "unit": spec["unit"],
+                        "group": spec["group"],
+                        "refresh_ms": spec["refresh_ms"],
+                        "endpoint": f"/api/{metric_id}",
+                        "fields": spec["fields"],
+                    }
+                )
 
             user_bodies[key] = dumps(
                 {
@@ -390,11 +412,19 @@ class GatewayApp:
                     "data": visible,
                 }
             )
+            catalog_bodies[key] = dumps(
+                {
+                    "code": 0,
+                    "snapshot_endpoint": "/snapshot",
+                    "metrics": catalog,
+                }
+            )
 
         self.snapshot = {
             "built_ms": int(time.time() * 1000),
             "metric_bodies": metric_bodies,
             "user_bodies": user_bodies,
+            "catalog_bodies": catalog_bodies,
         }
 
     def metric_is_stale(self, metric_id, now_ms=None):
@@ -498,6 +528,18 @@ class GatewayApp:
         snapshot = self.snapshot
         if snapshot is None:
             proto.response_empty(503, [])
+            return
+
+        if path == "/catalog":
+            key = self.authenticate(scope)
+            if not key:
+                proto.response_empty(401, [])
+                return
+            proto.response_bytes(
+                200,
+                JSON_HEADERS,
+                snapshot["catalog_bodies"][key],
+            )
             return
 
         if path == "/snapshot":
