@@ -124,8 +124,13 @@ Each metrics.json entry supports:
 - `sql`: read-only SELECT against that metric's final StarRocks table/view.
 - `refresh_ms`: how often the gateway reads that table.
 - `max_stale_ms`: when readiness considers that metric stale.
+- `max_rows`: hard safety bound for one metric result; defaults to `default_max_rows`.
+
+The gateway fetches at most `max_rows + 1` rows and rejects the refresh if the configured result is unexpectedly large, retaining the previous last-good value.
 
 The scheduler uses `refresh_concurrency` as a hard cap. With the default 12, no more than 12 metric reads are active at once.
+
+Pools are created with lazy connections. A FE that is down when the gateway starts does not prevent startup; that FE is retried naturally on later pool acquisition, while other FE hosts continue serving refresh queries.
 
 After startup, future reads are phase-shifted across each refresh interval so 100 one-second metrics are not intentionally fired at the same millisecond.
 
