@@ -24,21 +24,26 @@ def dumps(value):
 
 
 def read_json(path):
-    with open(path, "rb") as f:
-        return json.load(f)
+    with open(path, "rb") as fp:
+        return json.load(fp)
 
 
 class GatewayApp:
     def __init__(self):
         self.config = None
+        self.metric_specs = {}
         self.metric_ids = ()
         self.metric_index = {}
+        self.metric_state = {}
+        self.next_due = {}
         self.users = {}
         self.pools = []
         self.pool_cursor = 0
         self.snapshot = None
-        self.refresh_task = None
-        self.refresh_failures = 0
+        self.scheduler_task = None
+        self.snapshot_task = None
+        self.inflight = {}
+        self.snapshot_dirty = False
         self.last_error = ""
 
     def __rsgi_init__(self, loop):
@@ -54,22 +59,10 @@ class GatewayApp:
         self.config = read_json(config_path)
         base = config_path.parent
 
-        metrics = self.config.get("metrics") or []
-        if not metrics:
-            raise RuntimeError("config.metrics must not be empty")
-        if len(metrics) > 4096:
-            raise RuntimeError("too many metrics")
-        if len(metrics) != len(set(metrics)):
-            raise RuntimeError("duplicate metric id")
-
-        for metric_id in metrics:
-            if not isinstance(metric_id, str) or not ID_RE.fullmatch(metric_id):
-                raise RuntimeError(f"invalid metric id: {metric_id!r}")
-
-        self.metric_ids = tuple(metrics)
-        self.metric_index = {
-            metric_id: idx for idx, metric_id in enumerate(self.metric_ids)
-        }
+        metrics_file = Path(self.config.get("metrics_file", "metrics.json"))
+        if not metrics_file.is_absolute():
+            metrics_file = base / metrics_file
+        self.load_metrics(metrics_file)
 
         users_file = Path(self.config.get("users_file", "users.json"))
         if not users_file.is_absolute():
@@ -79,38 +72,117 @@ class GatewayApp:
         sr = self.config["starrocks"]
         hosts = sr.get("hosts") or [sr.get("host", "127.0.0.1")]
         password = os.getenv(sr.get("password_env", "STARROCKS_PASSWORD"), "")
-        pool_per_fe = int(sr.get("pool_per_fe", 2))
+        pool_per_fe = int(sr.get("pool_per_fe", 4))
 
         for host in hosts:
-            pool = await aiomysql.create_pool(
-                host=host,
-                port=int(sr.get("port", 9030)),
-                user=sr["user"],
-                password=password,
-                db=sr["database"],
-                minsize=1,
-                maxsize=pool_per_fe,
-                autocommit=True,
-                charset="utf8mb4",
-                connect_timeout=float(sr.get("connect_timeout_s", 2)),
+            self.pools.append(
+                await aiomysql.create_pool(
+                    host=host,
+                    port=int(sr.get("port", 9030)),
+                    user=sr["user"],
+                    password=password,
+                    db=sr.get("database"),
+                    minsize=1,
+                    maxsize=pool_per_fe,
+                    autocommit=True,
+                    charset="utf8mb4",
+                    connect_timeout=float(sr.get("connect_timeout_s", 2)),
+                )
             )
-            self.pools.append(pool)
 
-        await self.refresh_once()
-        self.refresh_task = loop.create_task(self.refresh_loop())
+        await self.initial_refresh()
+
+        now = loop.time()
+        total = len(self.metric_ids)
+        for pos, metric_id in enumerate(self.metric_ids):
+            interval = self.metric_specs[metric_id]["refresh_ms"] / 1000.0
+            # Spread future reads across each metric's refresh window.
+            self.next_due[metric_id] = now + interval * (pos + 1) / total
+
+        self.rebuild_snapshot()
+        self.scheduler_task = loop.create_task(self.scheduler_loop())
+        self.snapshot_task = loop.create_task(self.snapshot_loop())
 
     async def stop(self):
-        if self.refresh_task is not None:
-            self.refresh_task.cancel()
-            try:
-                await self.refresh_task
-            except asyncio.CancelledError:
-                pass
+        for task in [self.scheduler_task, self.snapshot_task]:
+            if task is not None:
+                task.cancel()
+
+        for task in list(self.inflight.values()):
+            task.cancel()
+
+        tasks = [
+            task
+            for task in [self.scheduler_task, self.snapshot_task]
+            if task is not None
+        ] + list(self.inflight.values())
+
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
 
         for pool in self.pools:
             pool.close()
         for pool in self.pools:
             await pool.wait_closed()
+
+    def load_metrics(self, path):
+        data = read_json(path)
+        rows = data.get("metrics") or []
+        if not rows:
+            raise RuntimeError("metrics file contains no metrics")
+        if len(rows) > 4096:
+            raise RuntimeError("too many metrics")
+
+        default_refresh = int(self.config.get("default_refresh_ms", 1000))
+        default_stale = int(self.config.get("default_max_stale_ms", 10000))
+        specs = {}
+
+        for row in rows:
+            metric_id = row.get("id", "")
+            if not isinstance(metric_id, str) or not ID_RE.fullmatch(metric_id):
+                raise RuntimeError(f"invalid metric id: {metric_id!r}")
+            if metric_id in specs:
+                raise RuntimeError(f"duplicate metric id: {metric_id!r}")
+
+            sql = row.get("sql", "").strip()
+            if not sql:
+                raise RuntimeError(f"{metric_id!r} has no SQL")
+            if not sql.lower().startswith("select"):
+                raise RuntimeError(f"{metric_id!r} SQL must be SELECT")
+
+            refresh_ms = int(row.get("refresh_ms", default_refresh))
+            max_stale_ms = int(
+                row.get(
+                    "max_stale_ms",
+                    max(default_stale, refresh_ms * 3),
+                )
+            )
+            if refresh_ms < 100:
+                raise RuntimeError(
+                    f"{metric_id!r} refresh_ms must be >= 100"
+                )
+
+            specs[metric_id] = {
+                "id": metric_id,
+                "sql": sql,
+                "refresh_ms": refresh_ms,
+                "max_stale_ms": max_stale_ms,
+            }
+
+        self.metric_specs = specs
+        self.metric_ids = tuple(specs)
+        self.metric_index = {
+            metric_id: idx for idx, metric_id in enumerate(self.metric_ids)
+        }
+        self.metric_state = {
+            metric_id: {
+                "data": [],
+                "updated_ms": None,
+                "failures": 0,
+                "last_error": "",
+            }
+            for metric_id in self.metric_ids
+        }
 
     def load_users(self, path):
         data = read_json(path)
@@ -157,8 +229,11 @@ class GatewayApp:
         errors = []
         total = len(self.pools)
 
+        start_idx = self.pool_cursor
+        self.pool_cursor = (self.pool_cursor + 1) % total
+
         for offset in range(total):
-            idx = (self.pool_cursor + offset) % total
+            idx = (start_idx + offset) % total
             pool = self.pools[idx]
             try:
                 async with pool.acquire() as conn:
@@ -167,132 +242,162 @@ class GatewayApp:
                             await cur.execute(sql)
                             return await cur.fetchall()
 
-                    rows = await asyncio.wait_for(run(), timeout=timeout)
-
-                self.pool_cursor = (idx + 1) % total
-                return rows
+                    return await asyncio.wait_for(run(), timeout=timeout)
             except Exception as exc:
-                errors.append(f"{type(exc).__name__}: {exc}")
+                errors.append(
+                    f"{idx}:{type(exc).__name__}:{str(exc)[:120]}"
+                )
 
         raise RuntimeError("all FE queries failed: " + " | ".join(errors))
 
-    async def load_metric_data(self):
-        mode = self.config.get("mode", "batch")
+    async def refresh_metric(self, metric_id):
+        spec = self.metric_specs[metric_id]
+        state = self.metric_state[metric_id]
 
-        if mode == "batch":
-            id_column = self.config.get("metric_id_column", "metric_id")
-            rows = await self.query(self.config["batch_sql"])
-            grouped = {metric_id: [] for metric_id in self.metric_ids}
+        try:
+            rows = await self.query(spec["sql"])
+            state["data"] = [dict(row) for row in rows]
+            state["updated_ms"] = int(time.time() * 1000)
+            state["failures"] = 0
+            state["last_error"] = ""
+            self.snapshot_dirty = True
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            state["failures"] += 1
+            state["last_error"] = f"{type(exc).__name__}: {exc}"[:300]
+            self.last_error = f"{metric_id}: {state['last_error']}"[:500]
+        finally:
+            self.inflight.pop(metric_id, None)
 
-            for row in rows:
-                metric_id = str(row.get(id_column, ""))
-                if metric_id not in grouped:
-                    continue
-                item = dict(row)
-                item.pop(id_column, None)
-                grouped[metric_id].append(item)
+    async def initial_refresh(self):
+        concurrency = int(self.config.get("refresh_concurrency", 12))
+        sem = asyncio.Semaphore(concurrency)
 
-            if self.config.get("require_all_metrics", True):
-                missing = [
+        async def one(metric_id):
+            async with sem:
+                await self.refresh_metric(metric_id)
+
+        await asyncio.gather(
+            *(one(metric_id) for metric_id in self.metric_ids)
+        )
+
+    async def scheduler_loop(self):
+        tick = float(self.config.get("scheduler_tick_ms", 20)) / 1000.0
+        concurrency = int(self.config.get("refresh_concurrency", 12))
+        loop = asyncio.get_running_loop()
+
+        while True:
+            now = loop.time()
+            free = max(0, concurrency - len(self.inflight))
+
+            if free:
+                due = [
                     metric_id
-                    for metric_id, values in grouped.items()
-                    if not values
+                    for metric_id in self.metric_ids
+                    if metric_id not in self.inflight
+                    and self.next_due[metric_id] <= now
                 ]
-                if missing:
-                    raise RuntimeError(
-                        "missing metric rows: " + ",".join(missing[:20])
-                    )
+                due.sort(key=self.next_due.__getitem__)
 
-            return grouped
+                for metric_id in due[:free]:
+                    spec = self.metric_specs[metric_id]
+                    interval = spec["refresh_ms"] / 1000.0
+                    next_due = self.next_due[metric_id] + interval
+                    while next_due <= now:
+                        next_due += interval
+                    self.next_due[metric_id] = next_due
 
-        if mode == "per_metric":
-            queries = self.config.get("metric_queries") or {}
-            concurrency = int(self.config.get("refresh_concurrency", 8))
-            sem = asyncio.Semaphore(concurrency)
+                    task = loop.create_task(self.refresh_metric(metric_id))
+                    self.inflight[metric_id] = task
 
-            async def one(metric_id):
-                sql = queries.get(metric_id)
-                if not sql:
-                    raise RuntimeError(f"missing SQL for {metric_id!r}")
-                async with sem:
-                    rows = await self.query(sql)
-                return metric_id, [dict(row) for row in rows]
+            await asyncio.sleep(tick)
 
-            pairs = await asyncio.gather(
-                *(one(metric_id) for metric_id in self.metric_ids)
-            )
-            return dict(pairs)
+    async def snapshot_loop(self):
+        interval = (
+            float(self.config.get("snapshot_rebuild_ms", 20)) / 1000.0
+        )
+        while True:
+            await asyncio.sleep(interval)
+            if self.snapshot_dirty:
+                self.rebuild_snapshot()
+                self.snapshot_dirty = False
 
-        raise RuntimeError(f"unknown mode: {mode!r}")
+    def rebuild_snapshot(self):
+        metric_bodies = {}
+        metric_values = {}
 
-    def build_snapshot(self, data, updated_ms, version):
-        metric_bodies = {
-            metric_id: dumps(
+        for metric_id in self.metric_ids:
+            state = self.metric_state[metric_id]
+            value = {
+                "updated_ms": state["updated_ms"],
+                "data": state["data"],
+            }
+            metric_values[metric_id] = value
+            metric_bodies[metric_id] = dumps(
                 {
                     "code": 0,
                     "metric": metric_id,
-                    "updated_ms": updated_ms,
-                    "data": data.get(metric_id, []),
+                    **value,
                 }
             )
-            for metric_id in self.metric_ids
-        }
 
         user_bodies = {}
         for key, (_secret, mask) in self.users.items():
             visible = {}
             for idx, metric_id in enumerate(self.metric_ids):
                 if mask & (1 << idx):
-                    visible[metric_id] = data.get(metric_id, [])
+                    visible[metric_id] = metric_values[metric_id]
 
             user_bodies[key] = dumps(
                 {
                     "code": 0,
-                    "updated_ms": updated_ms,
+                    "snapshot_ms": int(time.time() * 1000),
                     "data": visible,
                 }
             )
 
-        return {
-            "version": version,
-            "updated_ms": updated_ms,
+        self.snapshot = {
+            "built_ms": int(time.time() * 1000),
             "metric_bodies": metric_bodies,
             "user_bodies": user_bodies,
         }
 
-    async def refresh_once(self):
-        data = await self.load_metric_data()
-        updated_ms = int(time.time() * 1000)
-        version = 1 if self.snapshot is None else self.snapshot["version"] + 1
+    def metric_is_stale(self, metric_id, now_ms=None):
+        now_ms = now_ms or int(time.time() * 1000)
+        state = self.metric_state[metric_id]
+        updated_ms = state["updated_ms"]
+        if updated_ms is None:
+            return True
+        return (
+            now_ms - updated_ms
+            > self.metric_specs[metric_id]["max_stale_ms"]
+        )
 
-        # Atomic reference replacement: readers see either old or new snapshot.
-        self.snapshot = self.build_snapshot(data, updated_ms, version)
-        self.refresh_failures = 0
-        self.last_error = ""
+    def readiness(self):
+        now_ms = int(time.time() * 1000)
+        uninitialized = []
+        stale = []
+        failed = []
 
-    async def refresh_loop(self):
-        interval = float(self.config.get("refresh_interval_ms", 1000)) / 1000.0
-        loop = asyncio.get_running_loop()
-        deadline = loop.time() + interval
+        for metric_id in self.metric_ids:
+            state = self.metric_state[metric_id]
+            if state["updated_ms"] is None:
+                uninitialized.append(metric_id)
+            elif self.metric_is_stale(metric_id, now_ms):
+                stale.append(metric_id)
+            if state["failures"]:
+                failed.append(metric_id)
 
-        while True:
-            delay = deadline - loop.time()
-            if delay > 0:
-                await asyncio.sleep(delay)
-
-            try:
-                await self.refresh_once()
-            except asyncio.CancelledError:
-                raise
-            except Exception as exc:
-                self.refresh_failures += 1
-                self.last_error = f"{type(exc).__name__}: {exc}"[:500]
-
-            deadline += interval
-            now = loop.time()
-            if deadline < now:
-                # Never overlap refreshes. If one cycle overruns, skip ahead.
-                deadline = now + interval
+        return {
+            "ready": not uninitialized and not stale,
+            "metrics": len(self.metric_ids),
+            "inflight": len(self.inflight),
+            "uninitialized": uninitialized,
+            "stale": stale,
+            "failed": failed,
+            "last_error": self.last_error,
+        }
 
     def authenticate(self, scope, metric_id=None):
         headers = scope.headers
@@ -332,15 +437,6 @@ class GatewayApp:
 
         return key
 
-    def snapshot_ready(self):
-        snapshot = self.snapshot
-        if snapshot is None:
-            return False
-
-        max_stale_ms = int(self.config.get("max_stale_ms", 10000))
-        age_ms = int(time.time() * 1000) - snapshot["updated_ms"]
-        return age_ms <= max_stale_ms
-
     async def __rsgi__(self, scope, proto):
         if scope.proto != "http":
             proto.response_empty(404, [])
@@ -357,34 +453,16 @@ class GatewayApp:
             return
 
         if path == "/readyz":
-            now_ms = int(time.time() * 1000)
-            snapshot = self.snapshot
-            ready = self.snapshot_ready()
-            body = dumps(
-                {
-                    "ready": ready,
-                    "updated_ms": snapshot["updated_ms"] if snapshot else None,
-                    "age_ms": (
-                        now_ms - snapshot["updated_ms"]
-                        if snapshot
-                        else None
-                    ),
-                    "refresh_failures": self.refresh_failures,
-                    "last_error": self.last_error,
-                }
+            ready = self.readiness()
+            proto.response_bytes(
+                200 if ready["ready"] else 503,
+                JSON_HEADERS,
+                dumps(ready),
             )
-            proto.response_bytes(200 if ready else 503, JSON_HEADERS, body)
             return
 
         snapshot = self.snapshot
         if snapshot is None:
-            proto.response_empty(503, [])
-            return
-
-        if (
-            not self.snapshot_ready()
-            and not self.config.get("serve_stale_on_error", True)
-        ):
             proto.response_empty(503, [])
             return
 
@@ -393,7 +471,11 @@ class GatewayApp:
             if not key:
                 proto.response_empty(401, [])
                 return
-            proto.response_bytes(200, JSON_HEADERS, snapshot["user_bodies"][key])
+            proto.response_bytes(
+                200,
+                JSON_HEADERS,
+                snapshot["user_bodies"][key],
+            )
             return
 
         if path.startswith("/api/"):
@@ -408,6 +490,10 @@ class GatewayApp:
                 return
             if auth is False:
                 proto.response_empty(403, [])
+                return
+
+            if self.metric_state[metric_id]["updated_ms"] is None:
+                proto.response_empty(503, [])
                 return
 
             proto.response_bytes(
