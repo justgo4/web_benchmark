@@ -1,0 +1,634 @@
+{
+  "workload": {
+    "metrics": 100,
+    "refresh_interval_s": 1,
+    "auth": "HMAC-SHA256 + timestamp + ACL bitset",
+    "response": "pre-serialized immutable JSON bytes",
+    "starrocks_query_per_request": false,
+    "metric_rates": [
+      1000,
+      5000,
+      10000,
+      20000
+    ],
+    "batch_rates": [
+      100,
+      1000,
+      5000
+    ]
+  },
+  "results": [
+    {
+      "name": "FastPySGI WSGI",
+      "kind": "fastpysgi",
+      "result": {
+        "status": "ok",
+        "metric": [
+          {
+            "rate": 1000,
+            "throughput": 1000.1868366514134,
+            "success": 1,
+            "p50_ms": 0.050353,
+            "p95_ms": 0.076947,
+            "p99_ms": 0.107261,
+            "max_ms": 0.899212,
+            "status_codes": {
+              "200": 4000
+            },
+            "errors": []
+          },
+          {
+            "rate": 5000,
+            "throughput": 4998.954663008249,
+            "success": 1,
+            "p50_ms": 0.08655,
+            "p95_ms": 0.143335,
+            "p99_ms": 0.194486,
+            "max_ms": 2.422366,
+            "status_codes": {
+              "200": 19997
+            },
+            "errors": []
+          },
+          {
+            "rate": 10000,
+            "throughput": 9997.494537891353,
+            "success": 1,
+            "p50_ms": 0.119871,
+            "p95_ms": 0.23856,
+            "p99_ms": 0.357062,
+            "max_ms": 4.571945,
+            "status_codes": {
+              "200": 40000
+            },
+            "errors": []
+          },
+          {
+            "rate": 20000,
+            "throughput": 20000.837430062988,
+            "success": 1,
+            "p50_ms": 0.062476,
+            "p95_ms": 0.404163,
+            "p99_ms": 1.669048,
+            "max_ms": 9.205071,
+            "status_codes": {
+              "200": 80000
+            },
+            "errors": []
+          }
+        ],
+        "batch": [
+          {
+            "rate": 100,
+            "throughput": 100.32097797223193,
+            "success": 1,
+            "p50_ms": 0.084915,
+            "p95_ms": 0.111452,
+            "p99_ms": 0.343059,
+            "max_ms": 0.882617,
+            "status_codes": {
+              "200": 300
+            },
+            "errors": []
+          },
+          {
+            "rate": 1000,
+            "throughput": 1000.3300542331873,
+            "success": 1,
+            "p50_ms": 0.050753,
+            "p95_ms": 0.070482,
+            "p99_ms": 0.098337,
+            "max_ms": 0.739291,
+            "status_codes": {
+              "200": 3000
+            },
+            "errors": []
+          },
+          {
+            "rate": 5000,
+            "throughput": 5000.181912078525,
+            "success": 1,
+            "p50_ms": 0.084071,
+            "p95_ms": 0.139392,
+            "p99_ms": 0.182328,
+            "max_ms": 1.721584,
+            "status_codes": {
+              "200": 14999
+            },
+            "errors": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "Granian RSGI + uvloop",
+      "kind": "granian_rsgi",
+      "result": {
+        "status": "ok",
+        "metric": [
+          {
+            "rate": 1000,
+            "throughput": 999.9688434313772,
+            "success": 1,
+            "p50_ms": 0.090317,
+            "p95_ms": 0.123856,
+            "p99_ms": 0.148118,
+            "max_ms": 0.549666,
+            "status_codes": {
+              "200": 3999
+            },
+            "errors": []
+          },
+          {
+            "rate": 5000,
+            "throughput": 5000.121250440263,
+            "success": 1,
+            "p50_ms": 0.127127,
+            "p95_ms": 0.168199,
+            "p99_ms": 0.245199,
+            "max_ms": 2.660582,
+            "status_codes": {
+              "200": 20000
+            },
+            "errors": []
+          },
+          {
+            "rate": 10000,
+            "throughput": 9997.319021457346,
+            "success": 1,
+            "p50_ms": 0.096658,
+            "p95_ms": 0.248235,
+            "p99_ms": 1.694906,
+            "max_ms": 15.465477,
+            "status_codes": {
+              "200": 40000
+            },
+            "errors": []
+          },
+          {
+            "rate": 20000,
+            "throughput": 19999.237074103905,
+            "success": 1,
+            "p50_ms": 0.101713,
+            "p95_ms": 0.750109,
+            "p99_ms": 5.918011,
+            "max_ms": 15.742327,
+            "status_codes": {
+              "200": 80000
+            },
+            "errors": []
+          }
+        ],
+        "batch": [
+          {
+            "rate": 100,
+            "throughput": 100.33051476813657,
+            "success": 1,
+            "p50_ms": 0.13228,
+            "p95_ms": 0.1664,
+            "p99_ms": 0.274688,
+            "max_ms": 0.587239,
+            "status_codes": {
+              "200": 300
+            },
+            "errors": []
+          },
+          {
+            "rate": 1000,
+            "throughput": 1000.0312563102598,
+            "success": 1,
+            "p50_ms": 0.095049,
+            "p95_ms": 0.122312,
+            "p99_ms": 0.145022,
+            "max_ms": 0.609106,
+            "status_codes": {
+              "200": 3000
+            },
+            "errors": []
+          },
+          {
+            "rate": 5000,
+            "throughput": 5000.120574278986,
+            "success": 1,
+            "p50_ms": 0.125759,
+            "p95_ms": 0.165532,
+            "p99_ms": 0.236794,
+            "max_ms": 1.885857,
+            "status_codes": {
+              "200": 14999
+            },
+            "errors": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "Granian RSGI + rloop",
+      "kind": "granian_rsgi",
+      "result": {
+        "status": "ok",
+        "metric": [
+          {
+            "rate": 1000,
+            "throughput": 1000.1723929642117,
+            "success": 1,
+            "p50_ms": 0.086285,
+            "p95_ms": 0.116226,
+            "p99_ms": 0.141307,
+            "max_ms": 0.695356,
+            "status_codes": {
+              "200": 4000
+            },
+            "errors": []
+          },
+          {
+            "rate": 5000,
+            "throughput": 5000.031115193629,
+            "success": 1,
+            "p50_ms": 0.125928,
+            "p95_ms": 0.169297,
+            "p99_ms": 0.250656,
+            "max_ms": 2.671161,
+            "status_codes": {
+              "200": 20000
+            },
+            "errors": []
+          },
+          {
+            "rate": 10000,
+            "throughput": 9999.956645187965,
+            "success": 1,
+            "p50_ms": 0.098563,
+            "p95_ms": 0.269821,
+            "p99_ms": 1.43432,
+            "max_ms": 16.676567,
+            "status_codes": {
+              "200": 40000
+            },
+            "errors": []
+          },
+          {
+            "rate": 20000,
+            "throughput": 20000.0817803344,
+            "success": 1,
+            "p50_ms": 0.0987,
+            "p95_ms": 0.74863,
+            "p99_ms": 4.940023,
+            "max_ms": 8.644219,
+            "status_codes": {
+              "200": 80000
+            },
+            "errors": []
+          }
+        ],
+        "batch": [
+          {
+            "rate": 100,
+            "throughput": 100.30475476618396,
+            "success": 1,
+            "p50_ms": 0.128414,
+            "p95_ms": 0.156872,
+            "p99_ms": 0.216613,
+            "max_ms": 0.598844,
+            "status_codes": {
+              "200": 300
+            },
+            "errors": []
+          },
+          {
+            "rate": 1000,
+            "throughput": 1000.3224446036752,
+            "success": 1,
+            "p50_ms": 0.09178,
+            "p95_ms": 0.117294,
+            "p99_ms": 0.14016,
+            "max_ms": 1.135688,
+            "status_codes": {
+              "200": 3000
+            },
+            "errors": []
+          },
+          {
+            "rate": 5000,
+            "throughput": 5000.054232254888,
+            "success": 1,
+            "p50_ms": 0.123062,
+            "p95_ms": 0.166498,
+            "p99_ms": 0.231436,
+            "max_ms": 1.66976,
+            "status_codes": {
+              "200": 15000
+            },
+            "errors": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "Granian RSGI + asyncio",
+      "kind": "granian_rsgi",
+      "result": {
+        "status": "ok",
+        "metric": [
+          {
+            "rate": 1000,
+            "throughput": 1000.2450635414253,
+            "success": 1,
+            "p50_ms": 0.108734,
+            "p95_ms": 0.138114,
+            "p99_ms": 0.162235,
+            "max_ms": 0.716972,
+            "status_codes": {
+              "200": 4000
+            },
+            "errors": []
+          },
+          {
+            "rate": 5000,
+            "throughput": 5000.015512548128,
+            "success": 1,
+            "p50_ms": 0.166176,
+            "p95_ms": 0.239431,
+            "p99_ms": 0.354351,
+            "max_ms": 3.424245,
+            "status_codes": {
+              "200": 20000
+            },
+            "errors": []
+          },
+          {
+            "rate": 10000,
+            "throughput": 9999.78581708753,
+            "success": 1,
+            "p50_ms": 0.105094,
+            "p95_ms": 0.186851,
+            "p99_ms": 2.288563,
+            "max_ms": 17.501056,
+            "status_codes": {
+              "200": 40000
+            },
+            "errors": []
+          },
+          {
+            "rate": 20000,
+            "throughput": 19999.908890415052,
+            "success": 1,
+            "p50_ms": 0.123655,
+            "p95_ms": 1.759284,
+            "p99_ms": 7.869743,
+            "max_ms": 17.887137,
+            "status_codes": {
+              "200": 80000
+            },
+            "errors": []
+          }
+        ],
+        "batch": [
+          {
+            "rate": 100,
+            "throughput": 100.32639852731334,
+            "success": 1,
+            "p50_ms": 0.15457,
+            "p95_ms": 0.184332,
+            "p99_ms": 0.277422,
+            "max_ms": 0.656893,
+            "status_codes": {
+              "200": 300
+            },
+            "errors": []
+          },
+          {
+            "rate": 1000,
+            "throughput": 1000.2607933287609,
+            "success": 1,
+            "p50_ms": 0.106638,
+            "p95_ms": 0.136564,
+            "p99_ms": 0.167087,
+            "max_ms": 0.538811,
+            "status_codes": {
+              "200": 3000
+            },
+            "errors": []
+          },
+          {
+            "rate": 5000,
+            "throughput": 5000.059545315067,
+            "success": 1,
+            "p50_ms": 0.166069,
+            "p95_ms": 0.236265,
+            "p99_ms": 0.295195,
+            "max_ms": 1.946357,
+            "status_codes": {
+              "200": 14998
+            },
+            "errors": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "Granian raw ASGI + uvloop",
+      "kind": "granian_asgi",
+      "result": {
+        "status": "ok",
+        "metric": [
+          {
+            "rate": 1000,
+            "throughput": 1000.1458517696365,
+            "success": 1,
+            "p50_ms": 0.099338,
+            "p95_ms": 0.129049,
+            "p99_ms": 0.15241,
+            "max_ms": 0.814385,
+            "status_codes": {
+              "200": 4000
+            },
+            "errors": []
+          },
+          {
+            "rate": 5000,
+            "throughput": 5000.1303559865955,
+            "success": 1,
+            "p50_ms": 0.143579,
+            "p95_ms": 0.186585,
+            "p99_ms": 0.265436,
+            "max_ms": 2.968839,
+            "status_codes": {
+              "200": 19995
+            },
+            "errors": []
+          },
+          {
+            "rate": 10000,
+            "throughput": 10000.047887729323,
+            "success": 1,
+            "p50_ms": 0.099107,
+            "p95_ms": 0.235666,
+            "p99_ms": 2.321312,
+            "max_ms": 15.133366,
+            "status_codes": {
+              "200": 40000
+            },
+            "errors": []
+          },
+          {
+            "rate": 20000,
+            "throughput": 19999.32220297122,
+            "success": 1,
+            "p50_ms": 0.110732,
+            "p95_ms": 0.796643,
+            "p99_ms": 5.964135,
+            "max_ms": 14.68012,
+            "status_codes": {
+              "200": 80000
+            },
+            "errors": []
+          }
+        ],
+        "batch": [
+          {
+            "rate": 100,
+            "throughput": 100.32190855946226,
+            "success": 1,
+            "p50_ms": 0.136824,
+            "p95_ms": 0.174129,
+            "p99_ms": 0.29001,
+            "max_ms": 0.668134,
+            "status_codes": {
+              "200": 300
+            },
+            "errors": []
+          },
+          {
+            "rate": 1000,
+            "throughput": 1000.0653112652828,
+            "success": 1,
+            "p50_ms": 0.102363,
+            "p95_ms": 0.131056,
+            "p99_ms": 0.155371,
+            "max_ms": 0.697499,
+            "status_codes": {
+              "200": 3000
+            },
+            "errors": []
+          },
+          {
+            "rate": 5000,
+            "throughput": 4999.685145186365,
+            "success": 1,
+            "p50_ms": 0.143686,
+            "p95_ms": 0.187255,
+            "p99_ms": 0.281954,
+            "max_ms": 2.280889,
+            "status_codes": {
+              "200": 14997
+            },
+            "errors": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "Sanic raw-bytes",
+      "kind": "sanic",
+      "result": {
+        "status": "ok",
+        "metric": [
+          {
+            "rate": 1000,
+            "throughput": 1000.1434245676567,
+            "success": 1,
+            "p50_ms": 0.08447,
+            "p95_ms": 0.128585,
+            "p99_ms": 0.164822,
+            "max_ms": 0.593623,
+            "status_codes": {
+              "200": 4000
+            },
+            "errors": []
+          },
+          {
+            "rate": 5000,
+            "throughput": 5000.094424283156,
+            "success": 1,
+            "p50_ms": 0.205705,
+            "p95_ms": 0.368165,
+            "p99_ms": 0.44444,
+            "max_ms": 2.384927,
+            "status_codes": {
+              "200": 20000
+            },
+            "errors": []
+          },
+          {
+            "rate": 10000,
+            "throughput": 9999.868319234005,
+            "success": 1,
+            "p50_ms": 0.11319,
+            "p95_ms": 0.612669,
+            "p99_ms": 1.002632,
+            "max_ms": 5.205277,
+            "status_codes": {
+              "200": 40000
+            },
+            "errors": []
+          },
+          {
+            "rate": 20000,
+            "throughput": 19999.366362154757,
+            "success": 1,
+            "p50_ms": 0.332553,
+            "p95_ms": 6.075411,
+            "p99_ms": 11.073755,
+            "max_ms": 115.699434,
+            "status_codes": {
+              "200": 79999
+            },
+            "errors": []
+          }
+        ],
+        "batch": [
+          {
+            "rate": 100,
+            "throughput": 100.32743684975267,
+            "success": 1,
+            "p50_ms": 0.139828,
+            "p95_ms": 0.1786,
+            "p99_ms": 0.245219,
+            "max_ms": 0.62902,
+            "status_codes": {
+              "200": 300
+            },
+            "errors": []
+          },
+          {
+            "rate": 1000,
+            "throughput": 1000.3008624910132,
+            "success": 1,
+            "p50_ms": 0.086127,
+            "p95_ms": 0.131848,
+            "p99_ms": 0.169545,
+            "max_ms": 0.626076,
+            "status_codes": {
+              "200": 3000
+            },
+            "errors": []
+          },
+          {
+            "rate": 5000,
+            "throughput": 5000.097971378163,
+            "success": 1,
+            "p50_ms": 0.199097,
+            "p95_ms": 0.358647,
+            "p99_ms": 0.429237,
+            "max_ms": 1.713917,
+            "status_codes": {
+              "200": 14996
+            },
+            "errors": []
+          }
+        ]
+      }
+    }
+  ]
+}
