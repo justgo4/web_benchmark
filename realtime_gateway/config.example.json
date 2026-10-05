@@ -7,6 +7,7 @@
   "refresh_timeout_ms": 800,
   "default_refresh_ms": 1000,
   "default_max_stale_ms": 10000,
+  "default_max_rows": 1000,
   "auth_window_seconds": 30,
   "starrocks": {
     "hosts": ["10.0.0.11", "10.0.0.12", "10.0.0.13"],
