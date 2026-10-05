@@ -232,12 +232,62 @@ def main():
         )
         with conn.cursor() as cur:
             cur.execute("INSERT INTO metric_a VALUES (999)")
+            cur.execute("INSERT INTO metric_c VALUES (333)")
         conn.close()
 
+        # Fast metric refreshes; 5-second metric must not refresh yet.
         time.sleep(1.2)
         _, body = get("/api/m000")
         values = [row["value"] for row in body["data"]]
         assert 999 in values
+
+        # m002 is not visible to ci-user, so inspect readiness only for cadence.
+        with urllib.request.urlopen(
+            "http://127.0.0.1:8000/readyz",
+            timeout=3,
+        ) as response:
+            ready = json.loads(response.read())
+        assert ready["ready"] is True
+
+        # Break metric_b source. Its last-good value must remain available while
+        # metric_a continues to refresh independently.
+        conn = pymysql.connect(
+            host="127.0.0.1",
+            port=9030,
+            user="root",
+            password="",
+            database="gateway_ci",
+            autocommit=True,
+        )
+        with conn.cursor() as cur:
+            cur.execute("DROP TABLE metric_b")
+            cur.execute("INSERT INTO metric_a VALUES (1001)")
+        conn.close()
+
+        time.sleep(1.4)
+
+        _, body = get("/api/m000")
+        values = [row["value"] for row in body["data"]]
+        assert 1001 in values
+
+        _, body = get("/api/m001")
+        assert body["data"][0]["value"] == 20
+
+        with urllib.request.urlopen(
+            "http://127.0.0.1:8000/readyz",
+            timeout=3,
+        ) as response:
+            ready = json.loads(response.read())
+        assert "m001" in ready["failed"]
+
+        # After 5 seconds, the slow metric should finally refresh.
+        time.sleep(4.3)
+        with urllib.request.urlopen(
+            "http://127.0.0.1:8000/readyz",
+            timeout=3,
+        ) as response:
+            ready = json.loads(response.read())
+        assert ready["metrics"] == 3
 
         print("realtime gateway multi-table smoke test: PASS", flush=True)
     finally:
