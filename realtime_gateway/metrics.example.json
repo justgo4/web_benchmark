@@ -1,0 +1,28 @@
+{
+  "metrics": [
+    {
+      "id": "orders_now",
+      "sql": "SELECT /*+ SET_VAR(enable_query_cache=true, pipeline_dop=1) */ order_count, updated_at FROM dashboard.rt_orders_result ORDER BY updated_at DESC LIMIT 1",
+      "refresh_ms": 1000,
+      "max_stale_ms": 5000
+    },
+    {
+      "id": "gmv_now",
+      "sql": "SELECT /*+ SET_VAR(enable_query_cache=true, pipeline_dop=1) */ gmv, updated_at FROM dashboard.rt_gmv_result ORDER BY updated_at DESC LIMIT 1",
+      "refresh_ms": 1000,
+      "max_stale_ms": 5000
+    },
+    {
+      "id": "inventory_now",
+      "sql": "SELECT /*+ SET_VAR(enable_query_cache=true, pipeline_dop=1) */ sku_count, stock_value, updated_at FROM dashboard.inventory_result ORDER BY updated_at DESC LIMIT 1",
+      "refresh_ms": 5000,
+      "max_stale_ms": 20000
+    },
+    {
+      "id": "monthly_sales",
+      "sql": "SELECT /*+ SET_VAR(enable_query_cache=true, pipeline_dop=1) */ month, sales FROM dashboard.offline_monthly_sales ORDER BY month DESC LIMIT 12",
+      "refresh_ms": 60000,
+      "max_stale_ms": 300000
+    }
+  ]
+}
