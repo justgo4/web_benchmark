@@ -82,7 +82,7 @@ class GatewayApp:
                     user=sr["user"],
                     password=password,
                     db=sr.get("database"),
-                    minsize=1,
+                    minsize=0,
                     maxsize=pool_per_fe,
                     autocommit=True,
                     charset="utf8mb4",
@@ -135,6 +135,7 @@ class GatewayApp:
 
         default_refresh = int(self.config.get("default_refresh_ms", 1000))
         default_stale = int(self.config.get("default_max_stale_ms", 10000))
+        default_max_rows = int(self.config.get("default_max_rows", 1000))
         specs = {}
 
         for row in rows:
@@ -162,11 +163,18 @@ class GatewayApp:
                     f"{metric_id!r} refresh_ms must be >= 100"
                 )
 
+            max_rows = int(row.get("max_rows", default_max_rows))
+            if max_rows < 1 or max_rows > 100000:
+                raise RuntimeError(
+                    f"{metric_id!r} max_rows must be between 1 and 100000"
+                )
+
             specs[metric_id] = {
                 "id": metric_id,
                 "sql": sql,
                 "refresh_ms": refresh_ms,
                 "max_stale_ms": max_stale_ms,
+                "max_rows": max_rows,
             }
 
         self.metric_specs = specs
@@ -224,7 +232,7 @@ class GatewayApp:
             raise RuntimeError("users file contains no users")
         return users
 
-    async def query(self, sql):
+    async def query(self, sql, max_rows):
         timeout = float(self.config.get("refresh_timeout_ms", 800)) / 1000.0
         errors = []
         total = len(self.pools)
@@ -240,7 +248,12 @@ class GatewayApp:
                     async def run():
                         async with conn.cursor(aiomysql.DictCursor) as cur:
                             await cur.execute(sql)
-                            return await cur.fetchall()
+                            rows = await cur.fetchmany(max_rows + 1)
+                            if len(rows) > max_rows:
+                                raise RuntimeError(
+                                    f"query exceeded max_rows={max_rows}"
+                                )
+                            return rows
 
                     return await asyncio.wait_for(run(), timeout=timeout)
             except Exception as exc:
@@ -255,7 +268,7 @@ class GatewayApp:
         state = self.metric_state[metric_id]
 
         try:
-            rows = await self.query(spec["sql"])
+            rows = await self.query(spec["sql"], spec["max_rows"])
             state["data"] = [dict(row) for row in rows]
             state["updated_ms"] = int(time.time() * 1000)
             state["failures"] = 0
