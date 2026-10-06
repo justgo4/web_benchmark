@@ -81,6 +81,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: starrocks-async-${{ github.run_id }}
           path: |
             STARROCKS_ASYNC_BENCHMARK.md
