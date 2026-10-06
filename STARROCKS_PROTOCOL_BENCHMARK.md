@@ -18,9 +18,9 @@
 
 | Protocol | Median | p95 | Rows/s | Median bytes |
 |---|---:|---:|---:|---:|
-| MySQL protocol + PyMySQL | 25.533 ms | 30.145 ms | 3,917 | 2,590 |
-| HTTP SQL API + pyreqwest | 29.902 ms | 36.498 ms | 3,344 | 3,386 |
-| Arrow Flight SQL ADBC | 38.101 ms | 40.035 ms | 2,625 | 2,000 |
+| MySQL protocol + PyMySQL | 25.378 ms | 28.233 ms | 3,940 | 2,590 |
+| HTTP SQL API + pyreqwest | 29.828 ms | 37.107 ms | 3,353 | 3,386 |
+| Arrow Flight SQL ADBC | 38.468 ms | 46.903 ms | 2,600 | 2,000 |
 
 Winner: **MySQL protocol + PyMySQL**.
 
@@ -28,9 +28,9 @@ Winner: **MySQL protocol + PyMySQL**.
 
 | Protocol | Median | p95 | Rows/s | Median bytes |
 |---|---:|---:|---:|---:|
-| MySQL protocol + PyMySQL | 28.028 ms | 30.395 ms | 3,568 | 3,691 |
-| HTTP SQL API + pyreqwest | 30.650 ms | 31.724 ms | 3,263 | 3,691 |
-| Arrow Flight SQL ADBC | 48.992 ms | 50.109 ms | 2,041 | 3,691 |
+| MySQL protocol + PyMySQL | 26.576 ms | 26.774 ms | 3,763 | 3,691 |
+| HTTP SQL API + pyreqwest | 26.787 ms | 27.129 ms | 3,733 | 3,691 |
+| Arrow Flight SQL ADBC | 39.248 ms | 55.537 ms | 2,548 | 3,691 |
 
 Winner: **MySQL protocol + PyMySQL**.
 
@@ -40,12 +40,12 @@ Query Cache is enabled but plain row retrieval is not a Query Cache application 
 
 | Rows | HTTP ms | PyMySQL ms | Flight ms | Winner |
 |---:|---:|---:|---:|---|
-| 10 | 23.058 | 20.751 | 43.122 | MySQL protocol + PyMySQL |
-| 100 | 21.288 | 18.778 | 34.664 | MySQL protocol + PyMySQL |
-| 1,000 | 23.236 | 20.530 | 21.917 | MySQL protocol + PyMySQL |
-| 10,000 | 65.338 | 64.822 | 32.751 | Arrow Flight SQL ADBC |
-| 100,000 | 265.658 | 406.514 | 37.579 | Arrow Flight SQL ADBC |
-| 500,000 | 1226.816 | 1948.351 | 97.164 | Arrow Flight SQL ADBC |
+| 10 | 22.094 | 20.244 | 37.767 | MySQL protocol + PyMySQL |
+| 100 | 21.379 | 19.695 | 31.963 | MySQL protocol + PyMySQL |
+| 1,000 | 24.796 | 22.127 | 28.859 | MySQL protocol + PyMySQL |
+| 10,000 | 58.112 | 77.146 | 36.410 | Arrow Flight SQL ADBC |
+| 100,000 | 274.514 | 395.073 | 39.939 | Arrow Flight SQL ADBC |
+| 500,000 | 1179.334 | 2006.345 | 86.542 | Arrow Flight SQL ADBC |
 
 ## JSON-ready by result size
 
@@ -53,12 +53,12 @@ This includes conversion into JSON-compatible Python objects and JSON serializat
 
 | Rows | HTTP ms | PyMySQL ms | Flight ms | Winner |
 |---:|---:|---:|---:|---|
-| 10 | 21.969 | 19.369 | 33.622 | MySQL protocol + PyMySQL |
-| 100 | 21.567 | 18.209 | 42.409 | MySQL protocol + PyMySQL |
-| 1,000 | 26.301 | 20.965 | 29.429 | MySQL protocol + PyMySQL |
-| 10,000 | 97.540 | 68.175 | 46.707 | Arrow Flight SQL ADBC |
-| 100,000 | 553.031 | 514.264 | 136.299 | Arrow Flight SQL ADBC |
-| 500,000 | 2868.665 | 2552.160 | 621.490 | Arrow Flight SQL ADBC |
+| 10 | 27.209 | 20.684 | 35.837 | MySQL protocol + PyMySQL |
+| 100 | 20.971 | 18.289 | 28.824 | MySQL protocol + PyMySQL |
+| 1,000 | 28.116 | 26.613 | 33.147 | MySQL protocol + PyMySQL |
+| 10,000 | 67.740 | 62.154 | 33.123 | Arrow Flight SQL ADBC |
+| 100,000 | 568.189 | 515.309 | 138.463 | Arrow Flight SQL ADBC |
+| 500,000 | 2796.542 | 2539.415 | 604.854 | Arrow Flight SQL ADBC |
 
 ## Interpretation
 
