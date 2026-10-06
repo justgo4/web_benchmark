@@ -80,6 +80,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: python-http-benchmark-${{ github.run_id }}
           path: |
             RESULTS.md
