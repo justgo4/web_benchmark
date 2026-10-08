@@ -1,0 +1,9 @@
+aiomysql
+orjson
+aiohttp
+uvloop
+granian
+sanic
+bustapi
+litestar
+fastapi

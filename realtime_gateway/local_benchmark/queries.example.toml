@@ -1,0 +1,10 @@
+# Copy to queries.toml; add one entry per actual dashboard SQL.
+[[metrics]]
+id = "orders"
+sql = """SELECT order_count, updated_at
+FROM dashboard.rt_orders_result ORDER BY updated_at DESC LIMIT 1"""
+
+[[metrics]]
+id = "inventory"
+sql = """SELECT sku_count, stock_value, updated_at
+FROM dashboard.inventory_result ORDER BY updated_at DESC LIMIT 1"""
