@@ -1,6 +1,7 @@
 # 本地真实 StarRocks API 压测
 
 Python 3.13，Linux。所有框架使用同一 aiomysql MySQL 协议客户端、同一 SQL、相同连接池上限和 orjson 输出。
+测试阵容：BustAPI、Granian RSGI、Sanic、Litestar、Jero + Granian、Robyn、Socketify。
 每个成功指标请求执行一次 SELECT。无 API 缓存、后台快照、singleflight 或鉴权。
 StarRocks 自身 Query Cache 保持开启。SELECT 检查不是 SQL 安全沙箱，务必使用只能 SELECT 的账户。
 不要直接运行旧 starrocks_protocol_benchmark.py / starrocks_async_benchmark.py：它们是隔离环境测试，包含建库及数据初始化。
@@ -12,6 +13,7 @@ cd web_benchmark
 python3.13 -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
+sudo apt-get install -y libuv1 zlib1g
 python -m pip install -r realtime_gateway/local_benchmark/requirements.txt
 python -m pip freeze > server-packages.txt
 cp realtime_gateway/local_benchmark/queries.example.toml realtime_gateway/local_benchmark/queries.toml
@@ -60,13 +62,28 @@ Litestar：
 BENCH_FRAMEWORK=litestar granian --interface asgi --loop uvloop --workers 1 --runtime-threads 1 --host 0.0.0.0 --port 33335 realtime_gateway.local_benchmark.bench:app
 ```
 
-FastAPI：
+Jero + Granian（Python >= 3.13）：
 ```bash
-BENCH_FRAMEWORK=fastapi granian --interface asgi --loop uvloop --workers 1 --runtime-threads 1 --host 0.0.0.0 --port 33335 realtime_gateway.local_benchmark.bench:app
+BENCH_FRAMEWORK=jero granian --interface asgi --loop uvloop --workers 1 --runtime-threads 1 --host 0.0.0.0 --port 33335 realtime_gateway.local_benchmark.bench:app
 ```
 
-先测 1 worker，再全部改成 4 worker 重测。Sanic/BustAPI 使用 BENCH_WORKERS=4，
-Granian 使用 --workers 4。总池上限是 workers × SR_POOL_SIZE；相同轮次所有框架保持一致。
+Robyn：
+```bash
+BENCH_FRAMEWORK=robyn python realtime_gateway/local_benchmark/bench.py serve --log-level WARNING
+```
+
+Socketify（使用原生 Socketify 接口）：
+```bash
+BENCH_FRAMEWORK=socketify python -m socketify realtime_gateway.local_benchmark.bench:app --interface socketify --host 0.0.0.0 --port 33335 --workers 1
+```
+
+先测 1 worker，再全部改成 4 worker 重测。Sanic/BustAPI/Robyn 使用 BENCH_WORKERS=4，
+Granian/Socketify CLI 使用 --workers 4。Robyn 映射为 4 processes、每进程 1 worker；
+不要用 1 process × 4 threads 冒充 4 进程。总池上限是进程数 × SR_POOL_SIZE；相同轮次所有框架保持一致。
+Jero 使用 BytesResponse 和统一 orjson 输出，避免把不同 JSON 编码器速度混入框架排名。
+Socketify 必须在 await 前复制 URL，响应检查连接是否已经中断。
+Socketify 适配使用标准 asyncio Task，兼容 Python 3.13 超时与 aiomysql；HTTP content-type 传 bytes，避免原生接口吞掉类型错误。
+新增框架固定在本次验证版本：jero 0.1.3、robyn 0.88.0、socketify 0.0.31。
 不要同时运行不同框架争抢同一端口或资源。
 框架不支持共享 asyncio 池时会返回 502，预检查会停止，而不是把错误算成高性能。
 
@@ -95,3 +112,6 @@ versions_on_load_host 是发压机器版本；服务端版本以 server-packages
 CPU、RSS、StarRocks FE/BE CPU 和 SQL 延迟；最终在实际鉴权/权限代码接入后复测。
 本脚本是框架和数据库链路基线，不是完整生产 API。
 此工作环境没有用户 StarRocks 连接，不能声称已做真实集群压测。
+适配验证环境：CPython 3.13.16。七种方案分别通过 200/200 HTTP 请求及模拟连接池路径检查；
+这仅验证路由、异步任务、返回格式和发压计数，不是性能排名，也不验证真实 SQL 延迟。
+

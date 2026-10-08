@@ -6,4 +6,7 @@ granian
 sanic
 bustapi
 litestar
-fastapi
+jero==0.1.3
+robyn==0.88.0
+socketify==0.0.31
+

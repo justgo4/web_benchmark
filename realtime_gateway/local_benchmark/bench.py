@@ -117,14 +117,53 @@ elif kind == "bustapi":
         app.route(path, methods=["GET"])(handler)
     # Registration occurs in main after reading queries.
 
-elif kind == "fastapi":
-    from fastapi import FastAPI
-    from starlette.responses import Response
-    app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
-    @app.get("/{path:path}")
-    async def handler(path: str):
-        status, value = await result_for("/" + path.lstrip("/"))
-        return Response(encode(value), status_code=status, media_type="application/json")
+elif kind == "jero":
+    from jero import BaseApp, BytesResponse, Endpoint
+
+    def make_endpoint(path):
+        class MetricEndpoint(Endpoint, path=path):
+            async def get(self) -> BytesResponse:
+                status, value = await result_for(path)
+                return BytesResponse(content=encode(value), status_code=status,
+                                     raw_headers={"content-type": "application/json"})
+        MetricEndpoint.__name__ = "Metric_" + path.replace("/", "_")
+        return MetricEndpoint
+
+    class JeroApp(BaseApp):
+        async def wire(self) -> None:
+            for path in ["/healthz"] + ["/api/" + name for name in QUERIES]:
+                self._include_endpoint(make_endpoint(path)())
+
+    app = JeroApp()
+
+elif kind == "robyn":
+    from robyn import Robyn, Response
+    app = Robyn(__file__)
+
+    def register(path):
+        async def handler(request):
+            status, value = await result_for(path)
+            return Response(status_code=status,
+                            headers={"Content-Type": "application/json"},
+                            description=encode(value).decode())
+        handler.__name__ = "metric_" + path.replace("/", "_")
+        app.get(path)(handler)
+
+elif kind == "socketify":
+    # Socketify CLI expects a factory; create native app/event loop after fork.
+    def app(native_app):
+        # aiomysql and Python 3.13 timeout scopes require standard asyncio Tasks.
+        native_app.loop.loop.set_task_factory(None)
+        native_app.loop.run_async = lambda task, response=None: native_app.loop.loop.create_task(task)
+        def handler(res, req):
+            path = req.get_url()  # native request is invalid after the first await
+            res.grab_aborted_handler()
+            async def respond():
+                status, value = await result_for(path)
+                if not res.aborted:
+                    res.cork_send(encode(value), content_type=b"application/json", status=status)
+            native_app.loop.loop.create_task(respond())
+        native_app.get("/*", handler)
 
 elif kind == "litestar":
     from litestar import Litestar, get, Response
@@ -228,7 +267,7 @@ async def load(args):
         if active:
             await asyncio.gather(*list(active))
     versions = {}
-    for pkg in ["aiomysql", "orjson", "aiohttp", "granian", "sanic", "bustapi", "litestar", "fastapi", "uvloop"]:
+    for pkg in ["aiomysql", "orjson", "aiohttp", "granian", "sanic", "bustapi", "litestar", "jero", "robyn", "socketify", "uvloop"]:
         try:
             versions[pkg] = importlib.metadata.version(pkg)
         except importlib.metadata.PackageNotFoundError:
@@ -263,6 +302,7 @@ def main():
     p.add_argument("--concurrency", type=int, default=512)
     p.add_argument("--timeout", type=float, default=10)
     p.add_argument("--label", default="manual")
+    p.add_argument("--log-level", default="WARNING", help="Robyn logging level")
     p.add_argument("--output", default="results/local_starrocks.json")
     args = p.parse_args()
     if min(args.qps, args.seconds, args.concurrency, args.timeout) <= 0:
@@ -280,6 +320,13 @@ def main():
         for path in ["/healthz"] + ["/api/" + name for name in QUERIES]:
             register(path)
         app.run(host=host, port=port, workers=workers, debug=False)
+    elif kind == "robyn":
+        for path in ["/healthz"] + ["/api/" + name for name in QUERIES]:
+            register(path)
+        app.config.processes = workers
+        app.config.workers = 1
+        app.config.disable_openapi = True
+        app.start(host=host, port=port)
     else:
         p.error("Use granian CLI for this framework; see README")
 
