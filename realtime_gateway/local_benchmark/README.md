@@ -1,5 +1,32 @@
 # 本地真实 StarRocks API 压测
 
+## 一条命令测试全部框架（推荐）
+
+在 Linux、Python 3.13 环境，运行：
+```bash
+python3.13 realtime_gateway/local_benchmark/run_all.py
+```
+
+第一次询问 StarRocks 地址、数据库、只读用户名和密码；已有 SR_* 环境变量会直接使用。
+已有 queries.toml 会直接使用，否则交互录入指标和实际 SELECT；每段 SQL 用单独一行 . 结束。
+连接地址和用户名保存在 local.toml；密码不保存，下次输入或使用 SR_PASSWORD 环境变量。
+脚本自动创建独立 venv、安装依赖；Debian/Ubuntu 缺 libuv 时尝试下载并解压到本地，无需 sudo。
+
+之后自动检查 SQL、依次启动七种框架、发压、关闭全部子进程、保存结果并输出结论。
+默认 1 进程，100/1000/4000 总 QPS，各 20 秒、3 轮，随机交错测试顺序，总发压约 21 分钟加安装启动时间。
+某框架失败会记录日志并继续，不能将失败框架当成胜者。
+结果在 results/local_all_时间戳/SUMMARY.md，以及各轮 JSON、服务日志和发压日志。
+
+只测 4000 QPS 或测 4 进程：
+```bash
+python3.13 realtime_gateway/local_benchmark/run_all.py --qps 4000 --seconds 60 --rounds 3 --workers 4
+```
+
+总控默认在 API 服务器本机发压，适合方便复现；发压与服务争抢 CPU 时应另机复测。
+自动结论只比较满足成功率/吞吐条件的方案在本次目标 QPS 下的 p99，不声称测出了绝对吞吐极限。
+
+以下是手动运行说明，使用总控脚本无需逐一执行。
+
 Python 3.13，Linux。所有框架使用同一 aiomysql MySQL 协议客户端、同一 SQL、相同连接池上限和 orjson 输出。
 测试阵容：BustAPI、Granian RSGI、Sanic、Litestar、Jero + Granian、Robyn、Socketify。
 每个成功指标请求执行一次 SELECT。无 API 缓存、后台快照、singleflight 或鉴权。

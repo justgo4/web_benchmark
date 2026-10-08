@@ -1,2 +1,6 @@
 queries.toml
+local.toml
+.venv-benchmark/
+.native/
 __pycache__/
+
