@@ -2,8 +2,10 @@
 import argparse
 import asyncio
 import importlib.metadata
+import math
 import os
 import re
+import sys
 import time
 import tomllib
 from collections import Counter
@@ -17,6 +19,7 @@ QUERIES = {}
 POOL = None
 POOL_LOCK = None
 POOL_LOOP = None
+ERROR_LOG_COUNTS = Counter()
 
 
 def load_queries():
@@ -62,10 +65,20 @@ class RowLimitExceeded(RuntimeError):
     pass
 
 
+class QueryTimeout(TimeoutError):
+    def __init__(self, phase):
+        self.phase = phase
+        super().__init__(f"SR_TIMEOUT exceeded during {phase}")
+
+
 async def query_metric(name):
+    phase = "pool_init"
     async def read():
+        nonlocal phase
         pool = await get_pool()
+        phase = "pool_wait"
         async with pool.acquire() as conn:
+            phase = "execute_fetch"
             async with conn.cursor(aiomysql.DictCursor) as cur:
                 await cur.execute(QUERIES[name])
                 limit = int(os.getenv("SR_MAX_ROWS", "1000"))
@@ -76,7 +89,14 @@ async def query_metric(name):
                         "请在该 SELECT 中限定实际需要的结果，或将 SR_MAX_ROWS 调整为预期上限。"
                     )
                 return list(rows)
-    return await asyncio.wait_for(read(), float(os.getenv("SR_TIMEOUT", "5")))
+    timeout = asyncio.timeout(float(os.getenv("SR_TIMEOUT", "5")))
+    try:
+        async with timeout:
+            return await read()
+    except TimeoutError as exc:
+        if not timeout.expired():
+            raise
+        raise QueryTimeout(phase) from exc
 
 
 async def result_for(path):
@@ -89,7 +109,17 @@ async def result_for(path):
         rows = await query_metric(name)
         return 200, {"code": 0, "metric": name, "data": rows, "count": len(rows)}
     except Exception as exc:
-        return 502, {"code": 502, "message": type(exc).__name__}
+        phase = getattr(exc, "phase", "query")
+        key = (name, type(exc).__name__, phase)
+        ERROR_LOG_COUNTS[key] += 1
+        if ERROR_LOG_COUNTS[key] <= 3:
+            detail = str(exc)
+            password = os.getenv("SR_PASSWORD", "")
+            if password:
+                detail = detail.replace(password, "[REDACTED]")
+            print(f"metric={name} phase={phase} error={type(exc).__name__}: {detail}",
+                  file=sys.stderr, flush=True)
+        return 502, {"code": 502, "message": type(exc).__name__, "phase": phase}
 
 
 def encode(value):
@@ -189,6 +219,7 @@ async def check():
         if "4.1.1" not in str(version):
             print("NOTE: server version differs from expected 4.1.1")
         for name in QUERIES:
+            begin = time.perf_counter()
             try:
                 rows = await query_metric(name)
             except Exception as exc:
@@ -197,7 +228,8 @@ async def check():
                 if password:
                     detail = detail.replace(password, "[REDACTED]")
                 raise RuntimeError(f"指标 {name} 查询失败：{type(exc).__name__}: {detail}") from None
-            print(name, "rows:", len(rows))
+            print(name, "rows:", len(rows), "query_ms:", round((time.perf_counter()-begin)*1000, 2),
+                  "json_bytes:", len(encode(rows)), flush=True)
     finally:
         pool.close()
         await pool.wait_closed()
@@ -207,14 +239,14 @@ def percentile(values, pct):
     if not values:
         return None
     ordered = sorted(values)
-    return ordered[min(len(ordered)-1, int((len(ordered)-1)*pct/100))]
+    return ordered[max(0, min(len(ordered)-1, math.ceil(len(ordered)*pct/100)-1))]
 
 
 async def load(args):
     import aiohttp
     names = list(QUERIES)
     errors = Counter()
-    service, e2e = [], []
+    service, e2e, successful = [], [], []
     per_metric = {name: Counter() for name in names}
     active = set()
     offered = int(args.qps * args.seconds)
@@ -236,11 +268,13 @@ async def load(args):
         async def one(name, target):
             nonlocal completed, last_done
             begin = asyncio.get_running_loop().time()
+            ok = False
             try:
                 async with session.get(args.url.rstrip("/") + "/api/" + name) as r:
                     value = orjson.loads(await r.read())
                     if r.status != 200 or value.get("code") != 0 or value.get("metric") != name or not isinstance(value.get("data"), list):
-                        raise RuntimeError("HTTP/body failure " + str(r.status))
+                        raise RuntimeError(f"HTTP {r.status}: {value.get('message', 'invalid body')} phase={value.get('phase', 'unknown')}")
+                ok = True
                 completed += 1
                 per_metric[name]["ok"] += 1
             except Exception as exc:
@@ -249,6 +283,8 @@ async def load(args):
             finally:
                 done = asyncio.get_running_loop().time()
                 last_done = max(last_done, done)
+                if ok:
+                    successful.append((done - begin)*1000)
                 service.append((done - begin)*1000)
                 e2e.append((done - target)*1000)
         for i in range(offered):
@@ -279,6 +315,7 @@ async def load(args):
         "offered": offered, "completed": completed,
         "success_rate": completed/offered,
         "achieved_qps_including_drain": completed/max(args.seconds, last_done-start),
+        "successful_response_p99_ms": percentile(successful, 99),
         "response_p50_ms": percentile(service, 50),
         "response_p95_ms": percentile(service, 95),
         "response_p99_ms": percentile(service, 99),

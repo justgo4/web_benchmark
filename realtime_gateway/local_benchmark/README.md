@@ -143,3 +143,24 @@ CPU、RSS、StarRocks FE/BE CPU 和 SQL 延迟；最终在实际鉴权/权限代
 适配验证环境：CPython 3.13.16。六种方案分别通过 200/200 HTTP 请求及模拟连接池路径检查；
 这仅验证路由、异步任务、返回格式和发压计数，不是性能排名，也不验证真实 SQL 延迟。
 
+
+
+### 快速诊断失败
+
+先用当前 Python 环境运行：
+
+```bash
+python3.14 run_all.py --diagnose
+```
+
+这会以总负载 10 QPS、5 秒、1 轮运行六个框架；仍然连接真实 StarRocks，每次请求执行 SELECT。
+启动时立即打印日志绝对路径。独立复制 `local_benchmark` 时，结果在其上级的 `results/local_all_时间戳/`。
+保留自己的 `local.toml`、`queries.toml`，更新整个测试文件夹的代码，避免新旧脚本混用。
+
+`database-check.log` 包含逐指标查询耗时和 JSON 字节数。502 的错误统计保留错误类型和阶段；
+`pool_init` 表示建池，`pool_wait` 表示等待连接，`execute_fetch` 表示执行 SQL 和读取结果。
+每个指标的同类错误最多打印三次到 `server.log`，用于诊断，不打印 SQL 或数据库密码。
+汇总 p99 只统计成功请求，完整 JSON 仍保留所有已发送请求的延迟和失败数量。
+负载按 QPS 从低到高运行，每个档位内打乱框架顺序。
+
+排错时打包结果目录即可，不需要附带连接配置。诊断通过后再运行 `python3.14 run_all.py` 做正式比较。

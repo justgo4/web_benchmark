@@ -129,7 +129,7 @@ def build_summary(cases, rates, rounds):
     conclusions = []
     for rate in rates:
         lines += [f"## 总负载 {rate} QPS", "",
-                  "| 框架 | 完成轮次 | 最低成功率 | 中位吞吐 QPS | 中位 p99 ms | 判定 |",
+                  "| 框架 | 完成轮次 | 最低成功率 | 中位吞吐 QPS | 成功请求中位 p99 ms | 判定 |",
                   "|---|---:|---:|---:|---:|---|"]
         eligible = []
         for framework in FRAMEWORKS:
@@ -140,7 +140,8 @@ def build_summary(cases, rates, rounds):
                 continue
             success = min(r["success_rate"] for r in results)
             throughput = statistics.median(r["achieved_qps_including_drain"] for r in results)
-            latencies = [r["response_p99_ms"] for r in results if r["response_p99_ms"] is not None]
+            latencies = [r.get("successful_response_p99_ms", r["response_p99_ms"]) for r in results
+                         if r.get("successful_response_p99_ms", r["response_p99_ms"]) is not None]
             p99 = statistics.median(latencies) if latencies else None
             passed = p99 is not None and len(results) == rounds and all(
                 r["success_rate"] >= .999 and r["achieved_qps_including_drain"] >= rate * .99
@@ -168,7 +169,10 @@ def main():
     parser.add_argument("--rounds", type=int, default=3)
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--concurrency", type=int, default=512)
+    parser.add_argument("--diagnose", action="store_true", help="10 QPS、5 秒、1 轮，快速定位失败原因")
     args = parser.parse_args()
+    if args.diagnose:
+        args.qps, args.seconds, args.rounds = "10", 5, 1
     rates = sorted(set(int(value) for value in args.qps.split(",")))
     if not rates or min(rates + [args.seconds, args.rounds, args.workers, args.concurrency]) <= 0:
         parser.error("参数必须为正数")
@@ -182,6 +186,7 @@ def main():
     count = len(tomllib.loads(queries.read_text())["metrics"])
     output = ROOT / "results" / ("local_all_" + datetime.now().strftime("%Y%m%d_%H%M%S_%f"))
     output.mkdir(parents=True)
+    print(f"日志和结果目录：{output}", flush=True)
     (output / "server-packages.txt").write_text("\n".join(sorted(
         f"{dist.metadata['Name']}=={dist.version}" for dist in importlib.metadata.distributions()
         if dist.metadata.get("Name"))) + "\n")
@@ -193,9 +198,13 @@ def main():
         print((output / "database-check.log").read_text(), file=sys.stderr)
         raise RuntimeError(f"数据库或 SQL 检查失败，见 {output / 'database-check.log'}")
     cases = []
-    plan = [(framework, rate, repeat) for repeat in range(1, args.rounds + 1)
-            for rate in rates for framework in FRAMEWORKS]
-    random.Random(20261009).shuffle(plan)
+    plan = []
+    rng = random.Random(20261009)
+    for rate in rates:
+        for repeat in range(1, args.rounds + 1):
+            frameworks = list(FRAMEWORKS)
+            rng.shuffle(frameworks)
+            plan.extend((framework, rate, repeat) for framework in frameworks)
     try:
         for index, (framework, rate, repeat) in enumerate(plan, 1):
             label = f"{framework}-{args.workers}w-{rate}qps-r{repeat}"
@@ -226,6 +235,8 @@ def main():
                 except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
                     case["error"] = str(error)
                     print("  失败：", error, flush=True)
+                    print(f"  启动日志：{output / (label + '-server.log')}", flush=True)
+                    print(f"  压测日志：{output / (label + '-load.log')}（启动失败时可能不存在）", flush=True)
                 finally:
                     if process is not None:
                         stop_process(process)
