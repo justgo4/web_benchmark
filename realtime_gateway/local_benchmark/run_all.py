@@ -132,7 +132,7 @@ def build_summary(cases, rates, rounds):
                   "| 框架 | 完成轮次 | 最低成功率 | 中位吞吐 QPS | 成功请求中位 p99 ms | 判定 |",
                   "|---|---:|---:|---:|---:|---|"]
         eligible = []
-        for framework in FRAMEWORKS:
+        for framework in ["database"] + FRAMEWORKS:
             group = [case for case in cases if case["framework"] == framework and case["rate"] == rate]
             results = [case["result"] for case in group if "result" in case]
             if not results:
@@ -149,7 +149,7 @@ def build_summary(cases, rates, rounds):
                 for r in results)
             p99_text = f"{p99:.2f}" if p99 is not None else "—"
             lines.append(f"| {framework} | {len(results)}/{rounds} | {success:.3%} | {throughput:.1f} | {p99_text} | {'通过' if passed else '未通过'} |")
-            if passed:
+            if passed and framework != "database":
                 eligible.append((p99, framework))
         lines.append("")
         if eligible:
@@ -159,6 +159,7 @@ def build_summary(cases, rates, rounds):
             conclusions.append(f"{rate} QPS：没有方案满足全部资格，无法给出合格胜者。")
     lines += ["## 本次结论", ""] + conclusions
     lines += ["", "这里只比较本次目标负载下的延迟，不据此宣称某框架在所有场景最快。"]
+    lines.append("\ndatabase 为单个进程、单个连接池的直连基线，只执行并读取 SQL；不含 HTTP 和 JSON，不参加框架排名。多 worker 的 API 连接池总数不同，不能直接等同比较。")
     return "\n".join(lines) + "\n"
 
 
@@ -202,6 +203,7 @@ def main():
     rng = random.Random(20261009)
     for rate in rates:
         for repeat in range(1, args.rounds + 1):
+            plan.append(("database", rate, repeat))
             frameworks = list(FRAMEWORKS)
             rng.shuffle(frameworks)
             plan.extend((framework, rate, repeat) for framework in frameworks)
@@ -218,12 +220,14 @@ def main():
             process = None
             with (output / (label + "-server.log")).open("w") as log:
                 try:
-                    process = subprocess.Popen(command(python, framework, args.workers, port), env=service_env,
-                                               stdout=log, stderr=log, start_new_session=True)
-                    wait_ready(process, port)
+                    if framework != "database":
+                        process = subprocess.Popen(command(python, framework, args.workers, port), env=service_env,
+                                                   stdout=log, stderr=log, start_new_session=True)
+                        wait_ready(process, port)
                     result_file = output / (label + ".json")
                     with (output / (label + "-load.log")).open("w") as load_log:
-                        loaded = subprocess.run([str(python), str(HERE / "bench.py"), "load",
+                        loaded = subprocess.run([str(python), str(HERE / "bench.py"),
+                                                 "dbload" if framework == "database" else "load",
                                                  "--url", f"http://127.0.0.1:{port}", "--qps", str(rate),
                                                  "--seconds", str(args.seconds), "--concurrency", str(args.concurrency),
                                                  "--label", label, "--output", str(result_file)],

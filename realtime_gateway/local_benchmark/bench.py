@@ -8,6 +8,7 @@ import re
 import sys
 import time
 import tomllib
+from contextlib import AsyncExitStack
 from collections import Counter
 from pathlib import Path
 
@@ -253,16 +254,30 @@ async def load(args):
     completed = 0
     start = asyncio.get_running_loop().time()
     last_done = start
-    async with aiohttp.ClientSession(
-        connector=aiohttp.TCPConnector(limit=args.concurrency),
-        timeout=aiohttp.ClientTimeout(total=args.timeout),
-    ) as session:
-        # Validate every endpoint and warm each framework before measured requests.
+    direct = getattr(args, "mode", "load") == "dbload"
+    async with AsyncExitStack() as stack:
+        if direct:
+            pool = await get_pool()
+            async def close_pool():
+                pool.close()
+                await pool.wait_closed()
+            stack.push_async_callback(close_pool)
+            async def request(name):
+                return await query_metric(name)
+        else:
+            session = await stack.enter_async_context(aiohttp.ClientSession(
+                connector=aiohttp.TCPConnector(limit=args.concurrency),
+                timeout=aiohttp.ClientTimeout(total=args.timeout),
+            ))
+            async def request(name):
+                async with session.get(args.url.rstrip("/") + "/api/" + name) as r:
+                    value = orjson.loads(await r.read())
+                    if r.status != 200 or value.get("code") != 0 or value.get("metric") != name or not isinstance(value.get("data"), list):
+                        raise RuntimeError(f"HTTP {r.status}: {value.get('message', 'invalid body')} phase={value.get('phase', 'unknown')}")
+                    return value["data"]
+        # Same sequential preflight and paced scheduler for both transports.
         for name in names:
-            async with session.get(args.url.rstrip("/") + "/api/" + name) as r:
-                value = orjson.loads(await r.read())
-                if r.status != 200 or value.get("code") != 0 or value.get("metric") != name or not isinstance(value.get("data"), list):
-                    raise RuntimeError("Preflight failed: " + name + ": " + str(value))
+            await request(name)
         start = asyncio.get_running_loop().time()
         last_done = start
         async def one(name, target):
@@ -270,10 +285,7 @@ async def load(args):
             begin = asyncio.get_running_loop().time()
             ok = False
             try:
-                async with session.get(args.url.rstrip("/") + "/api/" + name) as r:
-                    value = orjson.loads(await r.read())
-                    if r.status != 200 or value.get("code") != 0 or value.get("metric") != name or not isinstance(value.get("data"), list):
-                        raise RuntimeError(f"HTTP {r.status}: {value.get('message', 'invalid body')} phase={value.get('phase', 'unknown')}")
+                await request(name)
                 ok = True
                 completed += 1
                 per_metric[name]["ok"] += 1
@@ -309,7 +321,8 @@ async def load(args):
         except importlib.metadata.PackageNotFoundError:
             pass
     out = {
-        "url": args.url, "label": args.label, "versions_on_load_host": versions,
+        "transport": "direct_mysql" if direct else "http",
+        "url": None if direct else args.url, "label": args.label, "versions_on_load_host": versions,
         "metrics": len(names), "offered_qps": args.qps,
         "qps_per_metric": args.qps / len(names),
         "offered": offered, "completed": completed,
@@ -332,7 +345,7 @@ async def load(args):
 def main():
     global QUERIES
     p = argparse.ArgumentParser()
-    p.add_argument("mode", choices=["serve", "check", "load"])
+    p.add_argument("mode", choices=["serve", "check", "load", "dbload"])
     p.add_argument("--url", default="http://127.0.0.1:33335")
     p.add_argument("--qps", type=int, default=100)
     p.add_argument("--seconds", type=int, default=60)
@@ -345,7 +358,7 @@ def main():
     if min(args.qps, args.seconds, args.concurrency, args.timeout) <= 0:
         p.error("Load parameters must be positive")
     QUERIES = load_queries()
-    if args.mode in ("check", "load"):
+    if args.mode in ("check", "load", "dbload"):
         asyncio.run(check() if args.mode == "check" else load(args))
         return
     host = os.getenv("BENCH_BIND", "0.0.0.0")

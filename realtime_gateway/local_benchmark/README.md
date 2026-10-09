@@ -164,3 +164,21 @@ python3.14 run_all.py --diagnose
 负载按 QPS 从低到高运行，每个档位内打乱框架顺序。
 
 排错时打包结果目录即可，不需要附带连接配置。诊断通过后再运行 `python3.14 run_all.py` 做正式比较。
+
+
+### 数据库直连基线
+
+`run_all.py` 在每个负载档位、每轮先运行 `database`，再运行六个框架，无需安装新包。
+直连基线共用 SQL、aiomysql、单个连接池上限、SR_TIMEOUT 和发压调度，只执行并读取查询，
+不经过 HTTP，不序列化每次查询结果，不参与框架胜者排名。默认单 worker 时 API 也使用一个池；
+使用多个 worker 时 API 有多个池，不能把两者等同比较。
+
+当前排查请先运行一次 100 QPS：
+
+```bash
+python3.14 run_all.py --qps 100 --seconds 20 --rounds 1
+```
+
+结果汇总增加 `database` 一行，详细错误在 `database-1w-100qps-r1-load.log` 和对应 JSON。
+若直连也失败，检查数据库、驱动、网络和发压进程；若直连正常而 HTTP 失败，重点检查 API 路径。
+该对比用于定位，不能单独证明数据库或框架是唯一瓶颈。
