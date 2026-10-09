@@ -18,9 +18,9 @@ from datetime import datetime
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[1]
+ROOT = HERE.parents[1] if HERE.parent.name == "realtime_gateway" else HERE.parent
 FRAMEWORKS = ["bustapi", "granian", "sanic", "litestar", "jero", "robyn"]
-MODULE = "realtime_gateway.local_benchmark.bench:app"
+MODULE = "bench:app"
 
 
 def command(python, framework, workers, port):
@@ -176,6 +176,7 @@ def main():
         parser.error("请用 Linux 的 Python 3.13 或更新版本运行")
     os.chdir(ROOT)
     env = dict(os.environ, BENCH_FRAMEWORK="granian", BENCH_BIND="127.0.0.1", BENCH_WORKERS=str(args.workers))
+    env["PYTHONPATH"] = str(HERE) + os.pathsep + env.get("PYTHONPATH", "")
     python = setup_python()
     queries = setup_config(env)
     count = len(tomllib.loads(queries.read_text())["metrics"])
@@ -189,6 +190,7 @@ def main():
         checked = subprocess.run([str(python), str(HERE / "bench.py"), "check"], env=env,
                                  stdout=log, stderr=log, timeout=max(60, count * 10))
     if checked.returncode:
+        print((output / "database-check.log").read_text(), file=sys.stderr)
         raise RuntimeError(f"数据库或 SQL 检查失败，见 {output / 'database-check.log'}")
     cases = []
     plan = [(framework, rate, repeat) for repeat in range(1, args.rounds + 1)

@@ -58,6 +58,27 @@ async def get_pool():
     return POOL
 
 
+class RowLimitExceeded(RuntimeError):
+    pass
+
+
+async def query_metric(name):
+    async def read():
+        pool = await get_pool()
+        async with pool.acquire() as conn:
+            async with conn.cursor(aiomysql.DictCursor) as cur:
+                await cur.execute(QUERIES[name])
+                limit = int(os.getenv("SR_MAX_ROWS", "1000"))
+                rows = await cur.fetchmany(limit + 1)
+                if len(rows) > limit:
+                    raise RowLimitExceeded(
+                        f"指标 {name} 返回至少 {len(rows)} 行，超过 SR_MAX_ROWS={limit}。"
+                        "请在该 SELECT 中限定实际需要的结果，或将 SR_MAX_ROWS 调整为预期上限。"
+                    )
+                return list(rows)
+    return await asyncio.wait_for(read(), float(os.getenv("SR_TIMEOUT", "5")))
+
+
 async def result_for(path):
     if path == "/healthz":
         return 200, {"ok": True}
@@ -65,17 +86,7 @@ async def result_for(path):
         return 404, {"code": 404, "message": "Unknown metric"}
     name = path[5:]
     try:
-        async def read():
-            pool = await get_pool()
-            async with pool.acquire() as conn:
-                async with conn.cursor(aiomysql.DictCursor) as cur:
-                    await cur.execute(QUERIES[name])
-                    limit = int(os.getenv("SR_MAX_ROWS", "1000"))
-                    rows = await cur.fetchmany(limit + 1)
-                    if len(rows) > limit:
-                        raise RuntimeError("Result exceeds SR_MAX_ROWS")
-                    return list(rows)
-        rows = await asyncio.wait_for(read(), float(os.getenv("SR_TIMEOUT", "5")))
+        rows = await query_metric(name)
         return 200, {"code": 0, "metric": name, "data": rows, "count": len(rows)}
     except Exception as exc:
         return 502, {"code": 502, "message": type(exc).__name__}
@@ -178,10 +189,15 @@ async def check():
         if "4.1.1" not in str(version):
             print("NOTE: server version differs from expected 4.1.1")
         for name in QUERIES:
-            status, value = await result_for("/api/" + name)
-            if status != 200:
-                raise RuntimeError(name + ": " + str(value))
-            print(name, "rows:", value["count"])
+            try:
+                rows = await query_metric(name)
+            except Exception as exc:
+                detail = str(exc)
+                password = os.getenv("SR_PASSWORD", "")
+                if password:
+                    detail = detail.replace(password, "[REDACTED]")
+                raise RuntimeError(f"指标 {name} 查询失败：{type(exc).__name__}: {detail}") from None
+            print(name, "rows:", len(rows))
     finally:
         pool.close()
         await pool.wait_closed()

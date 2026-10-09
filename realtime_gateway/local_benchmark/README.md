@@ -71,6 +71,9 @@ python realtime_gateway/local_benchmark/bench.py check
 ```
 
 check 打印实际版本、Query Cache 变量和每个查询行数，失败则停止。
+预检查直接显示原始异常原因；返回超过默认 1000 行会提示 SR_MAX_ROWS 和实际读取行数。
+如果业务确实需要超过 1000 行，可设置 SR_MAX_ROWS；否则建议 SQL 限定实际所需结果。
+整个 local_benchmark 文件夹也可单独复制运行，总控会使用同目录的 bench.py。
 运行时接口错误返回 502 和异常类型，不把 SQL/密码写入结果。
 
 ## 启动 API：每次只运行一种
