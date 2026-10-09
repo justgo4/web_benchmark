@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""One-command, real-StarRocks comparison of seven Python API stacks."""
+"""One-command, real-StarRocks comparison of six Python API stacks."""
 import argparse
-import ctypes
 import getpass
 import importlib.metadata
 import json
@@ -20,7 +19,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-FRAMEWORKS = ["bustapi", "granian", "sanic", "litestar", "jero", "robyn", "socketify"]
+FRAMEWORKS = ["bustapi", "granian", "sanic", "litestar", "jero", "robyn"]
 MODULE = "realtime_gateway.local_benchmark.bench:app"
 
 
@@ -28,9 +27,6 @@ def command(python, framework, workers, port):
     base = [str(python)]
     if framework in ("sanic", "bustapi", "robyn"):
         return base + [str(HERE / "bench.py"), "serve", "--log-level", "WARNING"]
-    if framework == "socketify":
-        return base + ["-m", "socketify", MODULE, "--interface", "socketify",
-                       "--host", "127.0.0.1", "--port", str(port), "--workers", str(workers)]
     return base + ["-m", "granian", "--interface", "rsgi" if framework == "granian" else "asgi",
                    "--loop", "uvloop", "--workers", str(workers), "--runtime-threads", "1",
                    "--host", "127.0.0.1", "--port", str(port), "--log-level", "warning", MODULE]
@@ -38,7 +34,7 @@ def command(python, framework, workers, port):
 
 def setup_python():
     packages = ["aiomysql", "orjson", "aiohttp", "uvloop", "granian", "sanic",
-                "bustapi", "litestar", "jero", "robyn", "socketify"]
+                "bustapi", "litestar", "jero", "robyn"]
     missing = []
     for package in packages:
         try:
@@ -49,13 +45,6 @@ def setup_python():
         raise RuntimeError("缺少 Python 包：" + ", ".join(missing)
                            + "。请先用当前解释器 pip install -r realtime_gateway/local_benchmark/requirements.txt")
     return Path(sys.executable)
-
-
-def setup_libuv(env):
-    try:
-        ctypes.CDLL("libuv.so.1")
-    except OSError as error:
-        raise RuntimeError("Socketify 缺少系统 libuv；Ubuntu/Debian 请先运行 sudo apt-get install -y libuv1 zlib1g") from error
 
 
 def setup_config(env):
@@ -134,7 +123,7 @@ def wait_ready(process, port):
 
 def build_summary(cases, rates, rounds):
     lines = ["# 真实 StarRocks API 对比", "",
-             "七种框架共用 SQL、aiomysql、连接池上限和 orjson；每次指标调用执行 SELECT。",
+             "六种框架共用 SQL、aiomysql、连接池上限和 orjson；每次指标调用执行 SELECT。",
              "发压端与 API 同机，结果包含资源竞争；不代表完整生产部署的最大吞吐。",
              "资格：每轮成功率至少 99.9%、吞吐至少目标的 99%、发压端没有丢弃请求，且完成全部轮次。", ""]
     conclusions = []
@@ -188,7 +177,6 @@ def main():
     os.chdir(ROOT)
     env = dict(os.environ, BENCH_FRAMEWORK="granian", BENCH_BIND="127.0.0.1", BENCH_WORKERS=str(args.workers))
     python = setup_python()
-    setup_libuv(env)
     queries = setup_config(env)
     count = len(tomllib.loads(queries.read_text())["metrics"])
     output = ROOT / "results" / ("local_all_" + datetime.now().strftime("%Y%m%d_%H%M%S_%f"))

@@ -149,22 +149,6 @@ elif kind == "robyn":
         handler.__name__ = "metric_" + path.replace("/", "_")
         app.get(path)(handler)
 
-elif kind == "socketify":
-    # Socketify CLI expects a factory; create native app/event loop after fork.
-    def app(native_app):
-        # aiomysql and Python 3.13 timeout scopes require standard asyncio Tasks.
-        native_app.loop.loop.set_task_factory(None)
-        native_app.loop.run_async = lambda task, response=None: native_app.loop.loop.create_task(task)
-        def handler(res, req):
-            path = req.get_url()  # native request is invalid after the first await
-            res.grab_aborted_handler()
-            async def respond():
-                status, value = await result_for(path)
-                if not res.aborted:
-                    res.cork_send(encode(value), content_type=b"application/json", status=status)
-            native_app.loop.loop.create_task(respond())
-        native_app.get("/*", handler)
-
 elif kind == "litestar":
     from litestar import Litestar, get, Response
     @get("/{path:path}")
@@ -267,7 +251,7 @@ async def load(args):
         if active:
             await asyncio.gather(*list(active))
     versions = {}
-    for pkg in ["aiomysql", "orjson", "aiohttp", "granian", "sanic", "bustapi", "litestar", "jero", "robyn", "socketify", "uvloop"]:
+    for pkg in ["aiomysql", "orjson", "aiohttp", "granian", "sanic", "bustapi", "litestar", "jero", "robyn", "uvloop"]:
         try:
             versions[pkg] = importlib.metadata.version(pkg)
         except importlib.metadata.PackageNotFoundError:
