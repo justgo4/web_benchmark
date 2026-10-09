@@ -3,11 +3,10 @@
 import argparse
 import ctypes
 import getpass
-import hashlib
+import importlib.metadata
 import json
 import os
 import random
-import shutil
 import signal
 import socket
 import statistics
@@ -16,7 +15,6 @@ import sys
 import time
 import tomllib
 import urllib.request
-import venv
 from datetime import datetime
 from pathlib import Path
 
@@ -39,47 +37,25 @@ def command(python, framework, workers, port):
 
 
 def setup_python():
-    folder = HERE / ".venv-benchmark"
-    python = folder / "bin/python"
-    if not python.exists():
-        print("创建独立测试环境…", flush=True)
-        venv.EnvBuilder(with_pip=True).create(folder)
-    requirements = HERE / "requirements.txt"
-    digest = hashlib.sha256(requirements.read_bytes()).hexdigest()
-    stamp = folder / "requirements.sha256"
-    if not stamp.exists() or stamp.read_text() != digest:
-        print("安装七种框架及压测依赖…", flush=True)
-        subprocess.run([str(python), "-m", "pip", "install", "-r", str(requirements)], check=True)
-        stamp.write_text(digest)
-    return python
+    packages = ["aiomysql", "orjson", "aiohttp", "uvloop", "granian", "sanic",
+                "bustapi", "litestar", "jero", "robyn", "socketify"]
+    missing = []
+    for package in packages:
+        try:
+            importlib.metadata.version(package)
+        except importlib.metadata.PackageNotFoundError:
+            missing.append(package)
+    if missing:
+        raise RuntimeError("缺少 Python 包：" + ", ".join(missing)
+                           + "。请先用当前解释器 pip install -r realtime_gateway/local_benchmark/requirements.txt")
+    return Path(sys.executable)
 
 
 def setup_libuv(env):
     try:
         ctypes.CDLL("libuv.so.1")
-        return
-    except OSError:
-        pass
-    # No sudo or global package mutation: extract the distro library locally.
-    folder = HERE / ".native"
-    found = list(folder.glob("**/libuv.so.1")) if folder.exists() else []
-    if not found and shutil.which("apt") and shutil.which("dpkg-deb"):
-        folder.mkdir(exist_ok=True)
-        print("为 Socketify 下载并解压 libuv 到测试目录…", flush=True)
-        for package in ("libuv1t64", "libuv1"):
-            result = subprocess.run(["apt", "download", package], cwd=folder,
-                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            if result.returncode == 0:
-                for archive in folder.glob("*.deb"):
-                    subprocess.run(["dpkg-deb", "-x", str(archive), str(folder)], check=True)
-                found = list(folder.glob("**/libuv.so.1"))
-                if found:
-                    break
-    if found:
-        locations = sorted({str(p.parent) for p in found})
-        env["LD_LIBRARY_PATH"] = ":".join(locations + [env.get("LD_LIBRARY_PATH", "")])
-    else:
-        print("未找到 libuv；Socketify 若启动失败会记录原因，其他框架继续测试。", flush=True)
+    except OSError as error:
+        raise RuntimeError("Socketify 缺少系统 libuv；Ubuntu/Debian 请先运行 sudo apt-get install -y libuv1 zlib1g") from error
 
 
 def setup_config(env):
@@ -211,13 +187,15 @@ def main():
         parser.error("请用 Linux 的 Python 3.13 或更新版本运行")
     os.chdir(ROOT)
     env = dict(os.environ, BENCH_FRAMEWORK="granian", BENCH_BIND="127.0.0.1", BENCH_WORKERS=str(args.workers))
-    queries = setup_config(env)
     python = setup_python()
     setup_libuv(env)
+    queries = setup_config(env)
     count = len(tomllib.loads(queries.read_text())["metrics"])
     output = ROOT / "results" / ("local_all_" + datetime.now().strftime("%Y%m%d_%H%M%S_%f"))
     output.mkdir(parents=True)
-    (output / "server-packages.txt").write_bytes(subprocess.check_output([str(python), "-m", "pip", "freeze"]))
+    (output / "server-packages.txt").write_text("\n".join(sorted(
+        f"{dist.metadata['Name']}=={dist.version}" for dist in importlib.metadata.distributions()
+        if dist.metadata.get("Name"))) + "\n")
     print(f"先检查 StarRocks 和 {count} 个实际 SQL…", flush=True)
     with (output / "database-check.log").open("w") as log:
         checked = subprocess.run([str(python), str(HERE / "bench.py"), "check"], env=env,
@@ -263,6 +241,7 @@ def main():
                         stop_process(process)
             cases.append(case)
             (output / "all-results.json").write_text(json.dumps({
+                "python": sys.version, "executable": sys.executable,
                 "workers": args.workers, "pool_per_process": int(env.get("SR_POOL_SIZE", "32")),
                 "metrics": count, "rates": rates, "rounds": args.rounds, "seconds": args.seconds,
                 "same_host_load_generator": True, "cases": cases,

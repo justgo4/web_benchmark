@@ -2,24 +2,31 @@
 
 ## 一条命令测试全部框架（推荐）
 
-在 Linux、Python 3.13 环境，运行：
+在 Linux、Python 3.14 环境，提前安装一次依赖：
 ```bash
-python3.13 realtime_gateway/local_benchmark/run_all.py
+python3.14 -m pip install -r realtime_gateway/local_benchmark/requirements.txt
+sudo apt-get install -y libuv1 zlib1g
+```
+
+然后运行：
+```bash
+python3.14 realtime_gateway/local_benchmark/run_all.py
 ```
 
 第一次询问 StarRocks 地址、数据库、只读用户名和密码；已有 SR_* 环境变量会直接使用。
 已有 queries.toml 会直接使用，否则交互录入指标和实际 SELECT；每段 SQL 用单独一行 . 结束。
 连接地址和用户名保存在 local.toml；密码不保存，下次输入或使用 SR_PASSWORD 环境变量。
-脚本自动创建独立 venv、安装依赖；Debian/Ubuntu 缺 libuv 时尝试下载并解压到本地，无需 sudo。
+脚本直接使用当前解释器及已安装依赖，不创建 venv、不安装 Python 包、不下载系统库。
+缺少依赖会在测试前提示；所有框架使用同一个 Python 3.14 环境。
 
 之后自动检查 SQL、依次启动七种框架、发压、关闭全部子进程、保存结果并输出结论。
-默认 1 进程，100/1000/4000 总 QPS，各 20 秒、3 轮，随机交错测试顺序，总发压约 21 分钟加安装启动时间。
+默认 1 进程，100/1000/4000 总 QPS，各 20 秒、3 轮，随机交错测试顺序，总发压约 21 分钟加启动时间。
 某框架失败会记录日志并继续，不能将失败框架当成胜者。
 结果在 results/local_all_时间戳/SUMMARY.md，以及各轮 JSON、服务日志和发压日志。
 
 只测 4000 QPS 或测 4 进程：
 ```bash
-python3.13 realtime_gateway/local_benchmark/run_all.py --qps 4000 --seconds 60 --rounds 3 --workers 4
+python3.14 realtime_gateway/local_benchmark/run_all.py --qps 4000 --seconds 60 --rounds 3 --workers 4
 ```
 
 总控默认在 API 服务器本机发压，适合方便复现；发压与服务争抢 CPU 时应另机复测。
@@ -27,7 +34,7 @@ python3.13 realtime_gateway/local_benchmark/run_all.py --qps 4000 --seconds 60 -
 
 以下是手动运行说明，使用总控脚本无需逐一执行。
 
-Python 3.13，Linux。所有框架使用同一 aiomysql MySQL 协议客户端、同一 SQL、相同连接池上限和 orjson 输出。
+Python 3.14，Linux。所有框架使用同一 aiomysql MySQL 协议客户端、同一 SQL、相同连接池上限和 orjson 输出。
 测试阵容：BustAPI、Granian RSGI、Sanic、Litestar、Jero + Granian、Robyn、Socketify。
 每个成功指标请求执行一次 SELECT。无 API 缓存、后台快照、singleflight 或鉴权。
 StarRocks 自身 Query Cache 保持开启。SELECT 检查不是 SQL 安全沙箱，务必使用只能 SELECT 的账户。
@@ -37,7 +44,7 @@ StarRocks 自身 Query Cache 保持开启。SELECT 检查不是 SQL 安全沙箱
 ```bash
 git clone https://github.com/justgo4/web_benchmark.git
 cd web_benchmark
-python3.13 -m venv .venv
+python3.14 -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
 sudo apt-get install -y libuv1 zlib1g
@@ -89,7 +96,7 @@ Litestar：
 BENCH_FRAMEWORK=litestar granian --interface asgi --loop uvloop --workers 1 --runtime-threads 1 --host 0.0.0.0 --port 33335 realtime_gateway.local_benchmark.bench:app
 ```
 
-Jero + Granian（Python >= 3.13）：
+Jero + Granian（Python >= 3.13，支持这里使用 Python 3.14）：
 ```bash
 BENCH_FRAMEWORK=jero granian --interface asgi --loop uvloop --workers 1 --runtime-threads 1 --host 0.0.0.0 --port 33335 realtime_gateway.local_benchmark.bench:app
 ```
@@ -109,7 +116,7 @@ Granian/Socketify CLI 使用 --workers 4。Robyn 映射为 4 processes、每进�
 不要用 1 process × 4 threads 冒充 4 进程。总池上限是进程数 × SR_POOL_SIZE；相同轮次所有框架保持一致。
 Jero 使用 BytesResponse 和统一 orjson 输出，避免把不同 JSON 编码器速度混入框架排名。
 Socketify 必须在 await 前复制 URL，响应检查连接是否已经中断。
-Socketify 适配使用标准 asyncio Task，兼容 Python 3.13 超时与 aiomysql；HTTP content-type 传 bytes，避免原生接口吞掉类型错误。
+Socketify 适配使用标准 asyncio Task，兼容 Python 3.14 超时与 aiomysql；HTTP content-type 传 bytes，避免原生接口吞掉类型错误。
 新增框架固定在本次验证版本：jero 0.1.3、robyn 0.88.0、socketify 0.0.31。
 不要同时运行不同框架争抢同一端口或资源。
 框架不支持共享 asyncio 池时会返回 502，预检查会停止，而不是把错误算成高性能。
@@ -139,6 +146,6 @@ versions_on_load_host 是发压机器版本；服务端版本以 server-packages
 CPU、RSS、StarRocks FE/BE CPU 和 SQL 延迟；最终在实际鉴权/权限代码接入后复测。
 本脚本是框架和数据库链路基线，不是完整生产 API。
 此工作环境没有用户 StarRocks 连接，不能声称已做真实集群压测。
-适配验证环境：CPython 3.13.16。七种方案分别通过 200/200 HTTP 请求及模拟连接池路径检查；
+适配验证环境：CPython 3.14.16。七种方案分别通过 200/200 HTTP 请求及模拟连接池路径检查；
 这仅验证路由、异步任务、返回格式和发压计数，不是性能排名，也不验证真实 SQL 延迟。
 
